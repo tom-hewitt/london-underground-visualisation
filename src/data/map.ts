@@ -573,6 +573,8 @@ export const LINK_NODES: Record<string, LinkNode> = {
 
   "ALEu-LSTu_MET": { x: 671, y: 403 },
   "AL-LSTu": { x: 657.7, y: 390.3 },
+
+  "LST-MGT": { x: 595.5, y: 390.3 },
 };
 
 export const LINK_SECTIONS: Record<string, LinkSection> = {
@@ -745,13 +747,13 @@ export const LINKS: Link[] = [
   },
   {
     lines: [
-      { lineName: "Metropolitan" },
-      { lineName: "Circle" },
       { lineName: "H&C" },
+      { lineName: "Circle" },
+      { lineName: "Metropolitan" },
     ],
     from: { nodeName: "LSTu_MET", directions: ["NB", "SB"] },
     to: { nodeName: "MGTu_MET", directions: ["NB", "SB"] },
-    path: [],
+    path: [{ linkNodeName: "LST-MGT" }],
   },
 
   {
