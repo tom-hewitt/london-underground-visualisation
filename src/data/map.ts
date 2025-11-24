@@ -31,7 +31,7 @@ export const STATIONS: Station[] = [
     asc: "CHXu",
   },
   { name: "Piccadilly Circus", nlc: 674, asc: "PICu" },
-  { name: "Oxford Circus", nlc: 669, asc: "OXCu" },
+  { name: "Oxford Circus", nlc: 669, asc: "OXCu", interchange: true },
   { name: "Regent's Park", nlc: 685, asc: "RPKu" },
   { name: "Baker Street", nlc: 511, asc: "BSTu" },
   { name: "Marylebone LU", nlc: 641, asc: "MYBu" },
@@ -74,7 +74,15 @@ export const STATIONS: Station[] = [
 
   { name: "Southwark", nlc: 784, asc: "SWKu", interchange: true },
 
+  { name: "Queensway", nlc: 681, asc: "QWYu" },
+  { name: "Lancaster Gate", nlc: 629, asc: "LANu" },
+  { name: "Marble Arch", nlc: 640, asc: "MARu" },
+  { name: "Bond Street", nlc: 524, asc: "BDSu", interchange: true },
+  { name: "Tottenham Court Road", nlc: 728, asc: "TCRu", interchange: true },
+  { name: "Holborn", nlc: 607, asc: "HOLu", interchange: true },
+  { name: "Chancery Lane", nlc: 541, asc: "CYLu" },
   { name: "St Paul's", nlc: 697, asc: "STPu", interchange: true },
+
   { name: "Liverpool Street LU", nlc: 634, asc: "LSTu", interchange: true },
   { name: "Aldgate", nlc: 502, asc: "ALDu" },
   { name: "Moorgate", nlc: 645, asc: "MGTu", interchange: true },
@@ -88,7 +96,6 @@ export const STATIONS: Station[] = [
   },
   { name: "Euston Square", nlc: 575, asc: "ESQu", interchange: true },
   { name: "Great Portland Street", nlc: 588, asc: "GPSu" },
-  { name: "Baker Street", nlc: 511, asc: "BSTu", interchange: true },
   { name: "Edgware Road", nlc: 569, asc: "ERDu", interchange: true },
 
   { name: "Oval", nlc: 668, asc: "OVLu", interchange: true },
@@ -337,6 +344,55 @@ export const STATION_NODES: Record<string, StationNode> = {
   },
 
   // Central
+  QWYu_CEN: {
+    name: "QWYu_CEN",
+    station: { nlc: 681 },
+    x: 382.1,
+    y: 419.4,
+  },
+  LANu_CEN: {
+    name: "LANu_CEN",
+    station: { nlc: 629 },
+    x: 401,
+    y: 415.5,
+  },
+  MARu_CEN: {
+    name: "MARu_CEN",
+    station: { nlc: 640 },
+    x: 409.6,
+    y: 407,
+  },
+  BDSu_CEN: {
+    name: "BDSu_CEN",
+    station: { nlc: 524 },
+    x: 435.3,
+    y: 400.1,
+  },
+  OXCu_CEN: {
+    name: "OXCu_CEN",
+    station: { nlc: 669 },
+    x: 461.9,
+    y: 400.1,
+  },
+  TCRu_CEN: {
+    name: "TCRu_CEN",
+    station: { nlc: 728 },
+    x: 496.4,
+    y: 400.1,
+  },
+  HOLu_CEN: {
+    name: "HOLu_CEN",
+    station: { nlc: 607 },
+    x: 527.2,
+    y: 400.1,
+  },
+  CYLu_CEN: {
+    name: "CYLu_CEN",
+    station: { nlc: 541 },
+    x: 553.1,
+    y: 406.5,
+  },
+
   STPu_CEN: {
     name: "STPu_CEN",
     station: { nlc: 697 },
@@ -598,6 +654,7 @@ export const STATION_NODE_ALIASES: Record<string, string> = {
   ALEu_MET: "ALEu_DIS",
   BNKu_CEN: "BNKu_WAC",
   LSTu_CEN: "LSTu_MET",
+  NHGu_CEN: "NHGu_DIS",
 };
 
 export function resolveStationNodeReference(
@@ -675,6 +732,10 @@ export const LINK_NODES: Record<string, LinkNode> = {
   "ELEu_BAK-LAMu_BAK-0": { x: 509.5, y: 572.5 },
 
   // Central
+  "QWY-LAN": { x: 397, y: 419.4 },
+  "MAR-BDS": { x: 416.5, y: 400.1 },
+  "HOL-CYL": { x: 546.5, y: 400.1 },
+  "CYL-STP": { x: 566, y: 419.4 },
   "STP-BNK": { x: 584.5, y: 419.4 },
 
   // Circle
@@ -808,6 +869,55 @@ export const LINKS: Link[] = [
   },
 
   // Central
+  {
+    lines: [{ lineName: "Central" }],
+    from: { nodeName: "NHGu_CEN" },
+    to: { nodeName: "QWYu_CEN" },
+  },
+  {
+    lines: [{ lineName: "Central" }],
+    from: { nodeName: "QWYu_CEN" },
+    to: { nodeName: "LANu_CEN" },
+    path: [{ linkNodeName: "QWY-LAN" }],
+  },
+  {
+    lines: [{ lineName: "Central" }],
+    from: { nodeName: "LANu_CEN" },
+    to: { nodeName: "MARu_CEN" },
+  },
+  {
+    lines: [{ lineName: "Central" }],
+    from: { nodeName: "MARu_CEN" },
+    to: { nodeName: "BDSu_CEN" },
+    path: [{ linkNodeName: "MAR-BDS" }],
+  },
+  {
+    lines: [{ lineName: "Central" }],
+    from: { nodeName: "BDSu_CEN" },
+    to: { nodeName: "OXCu_CEN" },
+  },
+  {
+    lines: [{ lineName: "Central" }],
+    from: { nodeName: "OXCu_CEN" },
+    to: { nodeName: "TCRu_CEN" },
+  },
+  {
+    lines: [{ lineName: "Central" }],
+    from: { nodeName: "TCRu_CEN" },
+    to: { nodeName: "HOLu_CEN" },
+  },
+  {
+    lines: [{ lineName: "Central" }],
+    from: { nodeName: "HOLu_CEN" },
+    to: { nodeName: "CYLu_CEN" },
+    path: [{ linkNodeName: "HOL-CYL" }],
+  },
+  {
+    lines: [{ lineName: "Central" }],
+    from: { nodeName: "CYLu_CEN" },
+    to: { nodeName: "STPu_CEN" },
+    path: [{ linkNodeName: "CYL-STP" }],
+  },
   {
     lines: [{ lineName: "Central" }],
     from: { nodeName: "STPu_CEN" },
