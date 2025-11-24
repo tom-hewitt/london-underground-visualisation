@@ -13,7 +13,7 @@ export interface StationReference {
 }
 
 export interface StationLabel {
-  name: string;
+  name: string | string[];
   station: StationReference;
   position: StationLabelPosition;
   alignment: Alignment;

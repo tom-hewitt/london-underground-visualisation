@@ -36,7 +36,7 @@ export const STATIONS: Station[] = [
   { name: "Baker Street", nlc: 511, asc: "BSTu" },
   { name: "Marylebone LU", nlc: 641, asc: "MYBu" },
   {
-    name: "Edgware Road (Bak)",
+    name: "Edgware Road (BAK)",
     nlc: 774,
     asc: "ERBu",
   },
@@ -99,7 +99,7 @@ export const STATIONS: Station[] = [
   },
   { name: "Euston Square", nlc: 575, asc: "ESQu", interchange: true },
   { name: "Great Portland Street", nlc: 588, asc: "GPSu" },
-  { name: "Edgware Road", nlc: 569, asc: "ERDu", interchange: true },
+  { name: "Edgware Road (DIS)", nlc: 569, asc: "ERDu", interchange: true },
 
   { name: "Oval", nlc: 668, asc: "OVLu", interchange: true },
   { name: "Battersea Power Station", nlc: 832, asc: "BPSu" },
@@ -125,6 +125,29 @@ export const STATIONS: Station[] = [
 ];
 
 export const STATION_LABELS: StationLabel[] = [
+  // Northern
+  {
+    name: ["Battersea", "Power", "Station"],
+    station: { nlc: 832 },
+    position: {
+      node: { nodeName: "BPSu_NOR" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: "Nine Elms",
+    station: { nlc: 831 },
+    position: {
+      node: { nodeName: "NIEu_NOR" },
+    },
+    alignment: {
+      textAnchor: "middle",
+      dominantBaseline: "text-before-edge",
+    },
+  },
   {
     name: "Oval",
     station: { nlc: 668 },
@@ -145,28 +168,6 @@ export const STATION_LABELS: StationLabel[] = [
     alignment: {
       textAnchor: "end",
       dominantBaseline: "text-after-edge",
-    },
-  },
-  {
-    name: "Elephant & Castle",
-    station: { nlc: 570 },
-    position: {
-      node: { nodeName: "ELEu_BAK" },
-    },
-    alignment: {
-      textAnchor: "start",
-      dominantBaseline: "text-before-edge",
-    },
-  },
-  {
-    name: "Lambeth North",
-    station: { nlc: 628 },
-    position: {
-      node: { nodeName: "LAMu_BAK" },
-    },
-    alignment: {
-      textAnchor: "start",
-      dominantBaseline: "middle",
     },
   },
   {
@@ -203,6 +204,287 @@ export const STATION_LABELS: StationLabel[] = [
     },
   },
   {
+    name: "Leicester Square",
+    station: { nlc: 631 },
+    position: {
+      node: { nodeName: "LSQu_NOR" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: ["Tottenham", "Court", "Road"],
+    station: { nlc: 728 },
+    position: {
+      node: { nodeName: "TCRu_NOR" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-after-edge",
+    },
+  },
+  {
+    name: ["Goodge", "Street"],
+    station: { nlc: 586 },
+    position: {
+      node: { nodeName: "GSTu_NOR" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "middle",
+    },
+  },
+  {
+    name: "Warren Street",
+    station: { nlc: 745 },
+    position: {
+      node: { nodeName: "WSTu_NOR" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: "Euston",
+    station: { nlc: 574 },
+    position: {
+      node: { nodeName: "EUSu_NORx" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "middle",
+    },
+  },
+  {
+    name: "Borough",
+    station: { nlc: 525 },
+    position: {
+      node: { nodeName: "BORu_NOR" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: ["Old", "Street"],
+    station: { nlc: 665 },
+    position: {
+      node: { nodeName: "OLDu_NOR" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "middle",
+    },
+  },
+  {
+    name: "Angel",
+    station: { nlc: 507 },
+    position: {
+      node: { nodeName: "ANGu_NOR" },
+    },
+    alignment: {
+      textAnchor: "middle",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: ["King's Cross", "& St Pancras", "International"],
+    station: { nlc: 625 },
+    position: {
+      node: { nodeName: "KXXu_NOR" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-after-edge",
+    },
+  },
+
+  // Bakerloo
+  {
+    name: "Elephant & Castle",
+    station: { nlc: 570 },
+    position: {
+      node: { nodeName: "ELEu_BAK" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: "Lambeth North",
+    station: { nlc: 628 },
+    position: {
+      node: { nodeName: "LAMu_BAK" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "middle",
+    },
+  },
+  {
+    name: ["Charing", "Cross"],
+    station: { nlc: 718 },
+    position: {
+      node: { nodeName: "CHXu_BAK" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: ["Piccadilly", "Circus"],
+    station: { nlc: 674 },
+    position: {
+      node: { nodeName: "PICu_BAK" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: "Regent's Park",
+    station: { nlc: 685 },
+    position: {
+      node: { nodeName: "RPKu_BAK" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-after-edge",
+    },
+  },
+  {
+    name: ["Baker", "Street"],
+    station: { nlc: 511 },
+    position: {
+      node: { nodeName: "BSTu_BAK" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: "Marylebone",
+    station: { nlc: 641 },
+    position: {
+      node: { nodeName: "MYBu_BAK" },
+    },
+    alignment: {
+      textAnchor: "middle",
+      dominantBaseline: "text-after-edge",
+    },
+  },
+  {
+    name: "Edgware Road",
+    station: { nlc: 774 },
+    position: {
+      node: { nodeName: "ERBu_BAK" },
+    },
+    alignment: {
+      textAnchor: "middle",
+      dominantBaseline: "text-after-edge",
+    },
+  },
+
+  // Central
+  {
+    name: "Queensway",
+    station: { nlc: 681 },
+    position: {
+      node: { nodeName: "QWYu_CEN" },
+    },
+    alignment: {
+      textAnchor: "middle",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: ["Lancaster", "Gate"],
+    station: { nlc: 629 },
+    position: {
+      node: { nodeName: "LANu_CEN" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: "Marble Arch",
+    station: { nlc: 640 },
+    position: {
+      node: { nodeName: "MARu_CEN" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "text-after-edge",
+    },
+  },
+  {
+    name: ["Oxford", "Circus"],
+    station: { nlc: 669 },
+    position: {
+      node: { nodeName: "OXCu_CEN" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: "Holborn",
+    station: { nlc: 607 },
+    position: {
+      node: { nodeName: "HOLu_CEN" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: "Chancery Lane",
+    station: { nlc: 541 },
+    position: {
+      node: { nodeName: "CYLu_CEN" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-after-edge",
+    },
+  },
+  {
+    name: "St Paul's",
+    station: { nlc: 697 },
+    position: {
+      node: { nodeName: "STPu_CEN" },
+    },
+    alignment: {
+      textAnchor: "middle",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+
+  // Jubilee
+  {
+    name: ["London", "Bridge"],
+    station: { nlc: 635 },
+    position: {
+      node: { nodeName: "LONu_JUB" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
     name: "Westminster",
     station: { nlc: 761 },
     position: {
@@ -211,6 +493,118 @@ export const STATION_LABELS: StationLabel[] = [
     alignment: {
       textAnchor: "end",
       dominantBaseline: "middle",
+    },
+  },
+  {
+    name: "Green Park",
+    station: { nlc: 590 },
+    position: {
+      node: { nodeName: "GPKu_JUB" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-after-edge",
+    },
+  },
+  {
+    name: ["Bond", "Street"],
+    station: { nlc: 524 },
+    position: {
+      node: { nodeName: "BDSu_JUB" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-after-edge",
+    },
+  },
+
+  // District
+  {
+    name: "Edgware Road",
+    station: { nlc: 569 },
+    position: {
+      node: { nodeName: "ERDu_DIS" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: "Bayswater",
+    station: { nlc: 517 },
+    position: {
+      node: { nodeName: "BAYu_DIS" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "middle",
+    },
+  },
+  {
+    name: ["Notting", "Hill Gate"],
+    station: { nlc: 663 },
+    position: {
+      node: { nodeName: "NHGu_DIS" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-after-edge",
+    },
+  },
+  {
+    name: "High Street Kensington",
+    station: { nlc: 605 },
+    position: {
+      node: { nodeName: "HSTu_DIS" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "middle",
+    },
+  },
+  {
+    name: ["Earl's", "Court"],
+    station: { nlc: 562 },
+    position: {
+      node: { nodeName: "ECTu_DIS" },
+    },
+    alignment: {
+      textAnchor: "middle",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: ["South", "Kensington"],
+    station: { nlc: 708 },
+    position: {
+      node: { nodeName: "SKNu_DIS" },
+    },
+    alignment: {
+      textAnchor: "middle",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: ["Sloane", "Square"],
+    station: { nlc: 702 },
+    position: {
+      node: { nodeName: "SSQu_DIS" },
+    },
+    alignment: {
+      textAnchor: "middle",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: ["St James's", "Park"],
+    station: { nlc: 695 },
+    position: {
+      node: { nodeName: "SJPu_DIS" },
+    },
+    alignment: {
+      textAnchor: "middle",
+      dominantBaseline: "text-before-edge",
     },
   },
   {
@@ -264,23 +658,23 @@ export const STATION_LABELS: StationLabel[] = [
       node: { nodeName: "BNKu_DIS" },
     },
     alignment: {
-      textAnchor: "middle",
+      textAnchor: "start",
       dominantBaseline: "text-before-edge",
     },
   },
   {
-    name: "Tower Hill",
+    name: ["Tower", "Hill"],
     station: { nlc: 731 },
     position: {
       node: { nodeName: "THLu_DIS" },
     },
     alignment: {
-      textAnchor: "end",
+      textAnchor: "start",
       dominantBaseline: "text-before-edge",
     },
   },
   {
-    name: "Aldgate East",
+    name: ["Aldgate", "East"],
     station: { nlc: 503 },
     position: {
       node: { nodeName: "ALEu_DIS" },
@@ -323,15 +717,155 @@ export const STATION_LABELS: StationLabel[] = [
       dominantBaseline: "text-after-edge",
     },
   },
+
+  // Elizabeth
   {
-    name: "St Paul's",
-    station: { nlc: 697 },
+    name: "Paddington",
+    station: { nlc: 670 },
     position: {
-      node: { nodeName: "STPu_CEN" },
+      node: { nodeName: "PADu_EZLc" },
     },
     alignment: {
       textAnchor: "middle",
       dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: "Liverpool Street",
+    station: { nlc: 634 },
+    position: {
+      node: { nodeName: "LSTu_EZLc" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+
+  // Metropolitan
+  {
+    name: "Barbican",
+    station: { nlc: 501 },
+    position: {
+      node: { nodeName: "BARu_MET" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: "Farringdon",
+    station: { nlc: 577 },
+    position: {
+      node: { nodeName: "FARu_MET" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-after-edge",
+    },
+  },
+  {
+    name: ["Euston", "Square"],
+    station: { nlc: 575 },
+    position: {
+      node: { nodeName: "ESQu_MET" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: ["Great Portland", "Street"],
+    station: { nlc: 588 },
+    position: {
+      node: { nodeName: "GPSu_MET" },
+    },
+    alignment: {
+      textAnchor: "middle",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+
+  // Picadilly
+  {
+    name: ["Gloucester", "Road"],
+    station: { nlc: 583 },
+    position: {
+      node: { nodeName: "GRDu_PIC" },
+    },
+    alignment: {
+      textAnchor: "middle",
+      dominantBaseline: "text-after-edge",
+    },
+  },
+  {
+    name: "Knightsbridge",
+    station: { nlc: 626 },
+    position: {
+      node: { nodeName: "KNBu_PIC" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "middle",
+    },
+  },
+  {
+    name: "Hyde Park Corner",
+    station: { nlc: 614 },
+    position: {
+      node: { nodeName: "HPCu_PIC" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "middle",
+    },
+  },
+  {
+    name: "Covent Garden",
+    station: { nlc: 553 },
+    position: {
+      node: { nodeName: "COVu_PIC" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: "Russell Square",
+    station: { nlc: 694 },
+    position: {
+      node: { nodeName: "RSQu_PIC" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "text-after-edge",
+    },
+  },
+
+  // Victoria
+  {
+    name: "Vauxhall",
+    station: { nlc: 777 },
+    position: {
+      node: { nodeName: "VUXu_VIC" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: "Victoria",
+    station: { nlc: 741 },
+    position: {
+      node: { nodeName: "VICu_VIC" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "middle",
     },
   },
 ];
@@ -1023,12 +1557,14 @@ export const LINK_NODES: Record<string, LinkNode> = {
   "HST-GRD": { x: 355.3, y: 479.6 },
 
   // District
+  "ERDu_DIS-PADu_DIS": { x: 382.7, y: 356.425 },
   "CST-BNK": { x: 594, y: 436.5 },
   "TEM-BLF": { x: 551.5, y: 479.6 },
 
   // Elizabeth
   "PAD-BDS": { x: 393, y: 369.3 },
-  "TCR-FAR": { x: 546.5, y: 367.8 },
+  "TCR-FAR-0": { x: 520.5, y: 393.7 },
+  "TCR-FAR-1": { x: 546.5, y: 367.8 },
 
   // Jubilee
   "LON-SWK-0": { x: 593.5, y: 481 },
@@ -1122,7 +1658,7 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Elizabeth Line" }],
     from: { nodeName: "TCRu_EZL" },
     to: { nodeName: "FARu_EZL" },
-    path: [{ linkNodeName: "TCR-FAR" }],
+    path: [{ linkNodeName: "TCR-FAR-0" }, { linkNodeName: "TCR-FAR-1" }],
   },
   {
     lines: [{ lineName: "Elizabeth Line" }],
@@ -1650,6 +2186,7 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Circle" }], // TODO: Displayed as district and circle on map but no district data exists?
     from: { nodeName: "ERDu_DIS", directions: ["WB", "EB"] },
     to: { nodeName: "PADu_DIS", directions: ["WB", "EB"] },
+    path: [{ linkNodeName: "ERDu_DIS-PADu_DIS" }],
   },
   {
     lines: [{ lineName: "Circle" }],

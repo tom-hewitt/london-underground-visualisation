@@ -1,5 +1,6 @@
 "use client";
 
+import { cabin } from "@/fonts";
 import {
   getStationNode,
   LINES,
@@ -296,12 +297,18 @@ export function TubeMapVisualisation({
           }
         };
 
+        const name = Array.isArray(label.name)
+          ? label.name.join(" ")
+          : label.name;
+
+        const key = `${label.station.nlc}-${name}`;
+
         if ("node" in label.position) {
           let node = stationNodeLinks[label.position.node.nodeName];
 
           return (
             <StationLabelView
-              key={label.name}
+              key={key}
               name={label.name}
               position={{ node }}
               alignment={label.alignment}
@@ -313,7 +320,7 @@ export function TubeMapVisualisation({
         } else {
           return (
             <StationLabelView
-              key={label.name}
+              key={key}
               name={label.name}
               position={label.position}
               alignment={label.alignment}
@@ -674,7 +681,7 @@ function StationLabelView({
   setHovered,
   fontSize = 4.69,
 }: {
-  name: string;
+  name: string | string[];
   position:
     | {
         node: [StationNode, [Link, Record<string, number>][]];
@@ -695,14 +702,25 @@ function StationLabelView({
   if ("node" in position) {
     let [stationNode, links] = position.node;
 
-    const total = sum(links, ([, lineLoads]) => sum(Object.values(lineLoads)));
+    const total =
+      max(links, ([, lineLoads]) => sum(Object.values(lineLoads))) ?? 0;
 
     switch (alignment.textAnchor) {
       case "start":
-        x = stationNode.x + scale(total) / 2 + 2;
+        x = stationNode.x + Math.max(scale(total) / 2, 2);
+        if (alignment.dominantBaseline === "middle") {
+          x += 1;
+        } else {
+          x += 0.4;
+        }
         break;
       case "end":
-        x = stationNode.x - scale(total) / 2 - 2;
+        x = stationNode.x - Math.max(scale(total) / 2, 2);
+        if (alignment.dominantBaseline === "middle") {
+          x -= 1;
+        } else {
+          x -= 0.4;
+        }
         break;
       case "middle":
         x = stationNode.x;
@@ -711,10 +729,20 @@ function StationLabelView({
 
     switch (alignment.dominantBaseline) {
       case "text-before-edge":
-        y = stationNode.y + scale(total) / 2;
+        y = stationNode.y + Math.max(scale(total) / 2, 2);
+        if (alignment.textAnchor === "middle") {
+          y += 1;
+        } else {
+          y += 0.4;
+        }
         break;
       case "text-after-edge":
-        y = stationNode.y - scale(total) / 2;
+        y = stationNode.y - Math.max(scale(total) / 2, 2);
+        if (alignment.textAnchor === "middle") {
+          y -= 1;
+        } else {
+          y -= 0.4;
+        }
         break;
       case "middle":
         y = stationNode.y;
@@ -725,17 +753,54 @@ function StationLabelView({
     y = position.y;
   }
 
+  const lines = Array.isArray(name) ? name : [name];
+
+  let linePositions: { text: string; x: number; y: number }[];
+
+  switch (alignment.dominantBaseline) {
+    case "text-before-edge":
+      linePositions = lines.map((text, i) => ({
+        text,
+        x,
+        y: y + i * fontSize,
+      }));
+      break;
+    case "text-after-edge":
+      linePositions = lines
+        .slice()
+        .reverse()
+        .map((text, i) => ({
+          text,
+          x,
+          y: y - i * fontSize,
+        }));
+      break;
+    case "middle":
+      linePositions = lines.map((text, i) => ({
+        text,
+        x,
+        y: y + (i - (lines.length - 1) / 2) * fontSize,
+      }));
+      break;
+  }
+
   return (
-    <text
-      x={x}
-      y={y}
-      fontSize={fontSize}
-      fontWeight={hovered ? "bold" : "normal"}
-      {...alignment}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {name}
-    </text>
+    <>
+      {linePositions.map(({ text, x, y }) => (
+        <text
+          className={cabin.className}
+          fill="#2E2B81"
+          x={x}
+          y={y}
+          fontSize={fontSize}
+          fontWeight={hovered ? 800 : 600}
+          {...alignment}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+        >
+          {text}
+        </text>
+      ))}
+    </>
   );
 }
