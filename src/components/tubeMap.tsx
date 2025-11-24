@@ -3,6 +3,8 @@
 import {
   getStationNode,
   LINES,
+  LINK_NODES,
+  LINK_SECTIONS,
   linkNames,
   LINKS,
   resolveStationNodeReference,
@@ -18,7 +20,6 @@ import {
   LinkReference,
   NonEmptyArray,
   Station,
-  StationLabel,
   StationNode,
   StationReference,
 } from "@/data/types";
@@ -92,8 +93,75 @@ export function TubeMapVisualisation({
           )
           .flat()
       ) ?? 0;
-    return scaleLinear().domain([0, maxNodeTotal]).range([1, 10]);
-  }, [stationNodeLinks]);
+    return scaleLinear().domain([0, maxNodeTotal]).range([0, 10]);
+  }, [totalLinkLoads]);
+
+  // Calculate the loads for each line along each link section (between two station or link nodes)
+  const linkSectionLoads = useMemo(() => {
+    const sectionLoads: Record<string, Record<string, number>> = {};
+
+    for (const [link, lineLoads] of totalLinkLoads) {
+      const pathNodes = link.path ?? [];
+
+      let previousNode = resolveStationNodeReference(link.from).nodeName;
+
+      for (const nodeName of [
+        ...pathNodes.map((n) => n.linkNodeName),
+        resolveStationNodeReference(link.to).nodeName,
+      ]) {
+        // The canonical name for a section link is sorted alphabetically
+        const sectionKey = [previousNode, nodeName]
+          .sort((a, b) => a.localeCompare(b))
+          .join("-");
+
+        if (!(sectionKey in sectionLoads)) {
+          sectionLoads[sectionKey] = {};
+        }
+
+        for (const [lineName, load] of Object.entries(lineLoads)) {
+          if (sectionLoads[sectionKey][lineName] === undefined) {
+            sectionLoads[sectionKey][lineName] = 0;
+          }
+          sectionLoads[sectionKey][lineName] += load;
+        }
+
+        previousNode = nodeName;
+      }
+    }
+
+    return sectionLoads;
+  }, [totalLinkLoads, widthScale]);
+
+  // Calculate the offset for each line at each link node
+  const linkSectionOffsets = useMemo(() => {
+    const offsets: Record<string, Record<string, number>> = {};
+
+    for (const [linkSectionName, lineLoads] of Object.entries(
+      linkSectionLoads
+    )) {
+      if (offsets[linkSectionName] === undefined) {
+        offsets[linkSectionName] = {};
+      }
+
+      const lines =
+        LINK_SECTIONS[linkSectionName]?.lines.map(({ lineName }) => lineName) ??
+        Object.keys(lineLoads);
+
+      const loads = lines.map((lineName) => lineLoads[lineName]);
+      const cumulativeLoads = [...cumsum(loads)];
+      const totalLoad = cumulativeLoads[cumulativeLoads.length - 1];
+      const lineOffsets = zip(loads, cumulativeLoads).map(
+        ([load, cumLoad]) =>
+          widthScale(cumLoad) - widthScale(load) / 2 - widthScale(totalLoad) / 2
+      );
+
+      for (const [lineName, lineOffset] of zip(lines, lineOffsets)) {
+        offsets[linkSectionName][lineName] = lineOffset;
+      }
+    }
+
+    return offsets;
+  }, [linkSectionLoads, widthScale]);
 
   const [hoveredItem, setHoveredItem] = useState<HoveredItem | null>(null);
 
@@ -138,8 +206,8 @@ export function TubeMapVisualisation({
                 key={`${link.from.nodeName}-${link.to.nodeName}-${lineName}`}
                 link={link}
                 line={{ lineName }}
+                linkSectionOffsets={linkSectionOffsets}
                 width={widthScale(lineLoad)}
-                offset={offset}
                 hovered={hovered}
                 setHovered={setHovered}
               />
@@ -250,20 +318,87 @@ const getNormal = (
   return { x: -dy / len, y: dx / len };
 };
 
+function length(a: { x: number; y: number }): number {
+  return Math.sqrt(a.x * a.x + a.y * a.y);
+}
+
+function calculateNormalAndOffset(
+  a: { name: string; x: number; y: number },
+  b: { name: string; x: number; y: number },
+  linkSectionOffsets: Record<string, Record<string, number>>,
+  line: LineReference
+): [{ x: number; y: number }, number] {
+  const sortedNodes = [a, b].sort((a, b) => a.name.localeCompare(b.name));
+
+  const normal = getNormal(sortedNodes[0], sortedNodes[1]);
+
+  const sectionKey = sortedNodes.map(({ name }) => name).join("-");
+
+  const offset = linkSectionOffsets[sectionKey]?.[line.lineName] ?? 0;
+
+  return [normal, offset];
+}
+
+function alongSegment(
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+  distance: number
+): { x: number; y: number } {
+  const bearing = Math.atan2(to.y - from.y, to.x - from.x);
+
+  return {
+    x: from.x + Math.cos(bearing) * distance,
+    y: from.y + Math.sin(bearing) * distance,
+  };
+}
+
+function dot(a: { x: number; y: number }, b: { x: number; y: number }): number {
+  return a.x * b.x + a.y * b.y;
+}
+
+function add(
+  a: { x: number; y: number },
+  b: { x: number; y: number }
+): { x: number; y: number } {
+  return { x: a.x + b.x, y: a.y + b.y };
+}
+
+function subtract(
+  a: { x: number; y: number },
+  b: { x: number; y: number }
+): { x: number; y: number } {
+  return { x: a.x - b.x, y: a.y - b.y };
+}
+
+function multiply(
+  v: { x: number; y: number },
+  scalar: number
+): { x: number; y: number } {
+  return { x: v.x * scalar, y: v.y * scalar };
+}
+
+function normalise(v: { x: number; y: number }): { x: number; y: number } {
+  const len = length(v);
+  if (len === 0) return { x: 0, y: 0 };
+  return { x: v.x / len, y: v.y / len };
+}
+
 function LinkView({
   link,
   line,
+  linkSectionOffsets,
   width = 2,
-  offset = 0,
   outlineWidth = 0.6,
+  radius = 10,
   hovered,
   setHovered,
 }: {
   link: Link;
   line: LineReference;
+  linkSectionOffsets: Record<string, Record<string, number>>;
   width?: number;
-  offset?: number;
   outlineWidth?: number;
+  radius?: number;
   hovered?: boolean;
   setHovered: (hovered: boolean) => void;
 }) {
@@ -272,80 +407,76 @@ function LinkView({
 
     const fromNode = getStationNode(link.from);
     const toNode = getStationNode(link.to);
-    const pathNodes = link.path ?? [];
 
-    // Helper to shift a point by a normal vector
-    const shift = (
-      p: { x: number; y: number },
-      normal: { x: number; y: number }
-    ) => ({
-      x: p.x + normal.x * offset,
-      y: p.y + normal.y * offset,
-    });
+    const pathNodes =
+      link.path?.map((nodeRef) => {
+        const linkNode = LINK_NODES[nodeRef.linkNodeName];
+        return { name: nodeRef.linkNodeName, x: linkNode.x, y: linkNode.y };
+      }) ?? [];
 
-    let currentPoint = { x: fromNode.x, y: fromNode.y };
+    let nextNode = pathNodes[0] ?? toNode;
 
-    // 1. Move to Start Point
-    // Determine start direction to calculate normal
-    let startTarget =
-      pathNodes.length > 0 ? pathNodes[0].cp1 ?? pathNodes[0] : toNode;
+    // Offset at the start is the offset of the first section
+    const [startNormal, startOffset] = calculateNormalAndOffset(
+      fromNode,
+      nextNode,
+      linkSectionOffsets,
+      line
+    );
 
-    // Handle zero-length control points if necessary
-    if (
-      startTarget.x === currentPoint.x &&
-      startTarget.y === currentPoint.y &&
-      pathNodes.length > 0
-    ) {
-      startTarget = pathNodes[0].cp2 ?? pathNodes[0];
+    linkPath.moveTo(
+      fromNode.x + startNormal.x * startOffset,
+      fromNode.y + startNormal.y * startOffset
+    );
+
+    let previousNode: { name: string; x: number; y: number } = fromNode;
+
+    for (let i = 0; i < pathNodes.length; i++) {
+      const corner = pathNodes[i];
+      nextNode = pathNodes[i + 1] ?? toNode;
+
+      // Offset of each path node is the largest offset of the two sections it connects
+      const [previousNormal, previousOffset] = calculateNormalAndOffset(
+        previousNode,
+        corner,
+        linkSectionOffsets,
+        line
+      );
+      const [nextNormal, nextOffset] = calculateNormalAndOffset(
+        corner,
+        nextNode,
+        linkSectionOffsets,
+        line
+      );
+
+      const offsetCorner = add(
+        corner,
+        add(
+          multiply(previousNormal, previousOffset),
+          multiply(nextNormal, nextOffset)
+        )
+      );
+
+      linkPath.lineTo(offsetCorner.x, offsetCorner.y);
+
+      previousNode = corner;
     }
 
-    const startNormal = getNormal(currentPoint, startTarget);
-    const startShifted = shift(currentPoint, startNormal);
-    linkPath.moveTo(startShifted.x, startShifted.y);
+    // Offset at the end is the offset of the last section
+    const [endNormal, endOffset] = calculateNormalAndOffset(
+      previousNode,
+      toNode,
+      linkSectionOffsets,
+      line
+    );
 
-    for (const node of pathNodes) {
-      if ("cp1" in node || "cp2" in node) {
-        const cp1 = node.cp1 ?? { x: node.x, y: node.y };
-        const cp2 = node.cp2 ?? { x: node.x, y: node.y };
-
-        // Calculate normals for the curve
-        const segStartNormal = getNormal(currentPoint, cp1);
-        const segEndNormal = getNormal(cp2, node);
-
-        // Fallback if start normal is zero length
-        const effectiveStartNormal =
-          segStartNormal.x === 0 && segStartNormal.y === 0
-            ? startNormal
-            : segStartNormal;
-
-        const cp1Shifted = shift(cp1, effectiveStartNormal);
-        const cp2Shifted = shift(cp2, segEndNormal);
-        const endShifted = shift(node, segEndNormal);
-
-        linkPath.bezierCurveTo(
-          cp1Shifted.x,
-          cp1Shifted.y,
-          cp2Shifted.x,
-          cp2Shifted.y,
-          endShifted.x,
-          endShifted.y
-        );
-      } else {
-        // Straight line segment
-        const normal = getNormal(currentPoint, node);
-        const endShifted = shift(node, normal);
-        linkPath.lineTo(endShifted.x, endShifted.y);
-      }
-      currentPoint = node;
-    }
-
-    // 3. Final Line to Destination
-    const finalNormal = getNormal(currentPoint, toNode);
-    const finalShifted = shift(toNode, finalNormal);
-    linkPath.lineTo(finalShifted.x, finalShifted.y);
+    linkPath.lineTo(
+      toNode.x + endNormal.x * endOffset,
+      toNode.y + endNormal.y * endOffset
+    );
 
     return linkPath.toString();
-  }, [link, offset]);
+  }, [link, linkSectionOffsets, line]);
 
   const colour = useMemo(() => LINES[line.lineName].colour, [line]);
 

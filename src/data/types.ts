@@ -56,17 +56,32 @@ export interface LineReference {
   lineName: string;
 }
 
+/// A link made up of multiple visual sections between two station nodes.
 export interface Link {
   lines: LineReference[];
   from: StationNodeReference & { directions?: [string, string] };
   to: StationNodeReference & { directions?: [string, string] };
-  path?: PathNode[];
+  path?: LinkNodeReference[];
 }
 
 export interface LinkReference {
   from: StationNodeReference;
   to: StationNodeReference;
   line: LineReference;
+}
+
+/// A point along a link that isn't a station node. The same link node can be reused by different links.
+export interface LinkNode {
+  x: number;
+  y: number;
+}
+
+export interface LinkNodeReference {
+  linkNodeName: string;
+}
+
+export interface LinkSection {
+  lines: LineReference[];
 }
 
 export interface PathNode {

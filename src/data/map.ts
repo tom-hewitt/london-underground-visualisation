@@ -2,6 +2,8 @@ import {
   Line,
   LineReference,
   Link,
+  LinkNode,
+  LinkSection,
   Station,
   StationLabel,
   StationNode,
@@ -396,7 +398,7 @@ export const STATION_NODES: Record<string, StationNode> = {
   ALDu_MET: {
     name: "ALDu_MET",
     station: { nlc: 502 },
-    x: 659,
+    x: 657.7,
     y: 413.8,
   },
   MGTu_MET: {
@@ -546,21 +548,62 @@ export const LINES: Record<string, Line> = {
   },
 };
 
+export const LINK_NODES: Record<string, LinkNode> = {
+  // Bakerloo
+  "ELEu_BAK-LAMu_BAK-0": { x: 509.5, y: 572.5 },
+
+  // Central
+  "STP-BNK": { x: 584.5, y: 419.4 },
+
+  // District
+  "CST-BNK": { x: 594, y: 436.5 },
+  "TEM-BLF": { x: 551.5, y: 479.6 },
+
+  // Jubilee
+  "SWKu_JUB-WLOu_JUB-0": { x: 495.3, y: 523.9 },
+  "WLOu_JUB-WMSu_JUB-0": { x: 495.4, y: 486 },
+
+  // Northern
+  "OVLu_NOR-KENu_NOR-0": { x: 492.8, y: 599.9 },
+  "OVLu_NOR-KENu_NORx-1": { x: 492.8, y: 593.25 },
+  "OVLu_NOR-KENu_NORb-1": { x: 499, y: 599.9 },
+
+  "THL-AL-0": { x: 659, y: 436.5 },
+  "THL-AL-1": { x: 659, y: 418.5 },
+
+  "ALEu-LSTu_MET": { x: 671, y: 403 },
+  "AL-LSTu": { x: 657.7, y: 390.3 },
+};
+
+export const LINK_SECTIONS: Record<string, LinkSection> = {
+  "ALEu_DIS-ALEu-LSTu_MET": {
+    lines: [{ lineName: "District" }, { lineName: "H&C" }],
+  },
+  "AL-LSTu-LSTu_MET": {
+    lines: [
+      { lineName: "Metropolitan" },
+      { lineName: "Circle" },
+      { lineName: "H&C" },
+    ],
+  },
+  "AL-LSTu-ALDu_MET": {
+    lines: [{ lineName: "Circle" }, { lineName: "Metropolitan" }],
+  },
+  "THL-AL-0-THLu_DIS": {
+    lines: [{ lineName: "District" }, { lineName: "Circle" }],
+  },
+  "BNKu_WAC-STP-BNK": {
+    lines: [{ lineName: "Waterloo & City" }, { lineName: "Central" }],
+  },
+};
+
 export const LINKS: Link[] = [
   // Bakerloo
   {
     lines: [{ lineName: "Bakerloo" }],
     from: { nodeName: "ELEu_BAK" },
     to: { nodeName: "LAMu_BAK" },
-    path: [
-      { x: 511.8, y: 574.7 },
-      {
-        x: 509.5,
-        y: 569.3,
-        cp1: { x: 510.6, y: 573.5 },
-        cp2: { x: 509.5, y: 571 },
-      },
-    ],
+    path: [{ linkNodeName: "ELEu_BAK-LAMu_BAK-0" }],
   },
   {
     lines: [{ lineName: "Bakerloo" }],
@@ -578,32 +621,13 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Jubilee" }],
     from: { nodeName: "SWKu_JUB" },
     to: { nodeName: "WLOu_JUB" },
-    path: [
-      {
-        x: 502.9,
-        y: 523.9,
-      },
-      {
-        x: 495.3,
-        y: 516.3,
-        cp1: { x: 498.7, y: 523.9 },
-        cp2: { x: 495.3, y: 520.5 },
-      },
-    ],
+    path: [{ linkNodeName: "SWKu_JUB-WLOu_JUB-0" }],
   },
   {
     lines: [{ lineName: "Jubilee" }],
     from: { nodeName: "WLOu_JUB" },
     to: { nodeName: "WMSu_JUB" },
-    path: [
-      { x: 495.4, y: 488.9 },
-      {
-        x: 493.1,
-        y: 483.5,
-        cp1: { x: 495.4, y: 487.2 },
-        cp2: { x: 494.3, y: 484.7 },
-      },
-    ],
+    path: [{ linkNodeName: "WLOu_JUB-WMSu_JUB-0" }],
   },
 
   // Northern
@@ -612,18 +636,8 @@ export const LINKS: Link[] = [
     from: { nodeName: "OVLu_NOR" },
     to: { nodeName: "KENu_NORx" },
     path: [
-      {
-        x: 492.8,
-        y: 596.7,
-        cp1: { x: 491.7, y: 600.9 },
-        cp2: { x: 492.8, y: 598.4 },
-      },
-      {
-        x: 495.1,
-        y: 590.9,
-        cp1: { x: 492.8, y: 595 },
-        cp2: { x: 493.8, y: 592.1 },
-      },
+      { linkNodeName: "OVLu_NOR-KENu_NOR-0" },
+      { linkNodeName: "OVLu_NOR-KENu_NORx-1" },
     ],
   },
   {
@@ -631,18 +645,8 @@ export const LINKS: Link[] = [
     from: { nodeName: "OVLu_NOR" },
     to: { nodeName: "KENu_NORb" },
     path: [
-      {
-        x: 495.9,
-        y: 599.9,
-        cp1: { x: 491.7, y: 600.9 },
-        cp2: { x: 494.1, y: 599.9 },
-      },
-      {
-        x: 501.7,
-        y: 597.6,
-        cp1: { x: 498, y: 599.9 },
-        cp2: { x: 500.5, y: 598.8 },
-      },
+      { linkNodeName: "OVLu_NOR-KENu_NOR-0" },
+      { linkNodeName: "OVLu_NOR-KENu_NORb-1" },
     ],
   },
   {
@@ -672,15 +676,7 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Central" }],
     from: { nodeName: "STPu_CEN" },
     to: { nodeName: "BNKu_CEN" },
-    path: [
-      { x: 581, y: 419.4 },
-      {
-        x: 586.4,
-        y: 417.1,
-        cp1: { x: 582.7, y: 419.4 },
-        cp2: { x: 585.2, y: 418.3 },
-      },
-    ],
+    path: [{ linkNodeName: "STP-BNK" }],
   },
   {
     lines: [{ lineName: "Central" }],
@@ -693,34 +689,12 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Waterloo & City" }],
     from: { nodeName: "WLOu_WAC" },
     to: { nodeName: "BNKu_WAC" },
-    path: [
-      { x: 547.7, y: 511.6 },
-      {
-        x: 553.1,
-        y: 509.3,
-        cp1: { x: 549.4, y: 511.6 },
-        cp2: { x: 551.9, y: 510.5 },
-      },
-      { x: 583.6, y: 478.8 },
-      {
-        x: 585.9,
-        y: 473.4,
-        cp1: { x: 584.9, y: 477.6 },
-        cp2: { x: 585.9, y: 475.2 },
-      },
-      { x: 585.9, y: 422.7 },
-      {
-        x: 588.2,
-        y: 417.3,
-        cp1: { x: 585.9, y: 421 },
-        cp2: { x: 587, y: 418.5 },
-      },
-    ],
+    path: [{ linkNodeName: "STP-BNK" }],
   },
 
   // Circle
   {
-    lines: [{ lineName: "Circle" }, { lineName: "District" }],
+    lines: [{ lineName: "District" }, { lineName: "Circle" }],
     from: { nodeName: "WMSu_DIS", directions: ["EB", "WB"] },
     to: { nodeName: "EMBu_DIS", directions: ["EB", "WB"] },
   },
@@ -730,18 +704,10 @@ export const LINKS: Link[] = [
     to: { nodeName: "TEMu_DIS", directions: ["EB", "WB"] },
   },
   {
-    lines: [{ lineName: "Circle" }, { lineName: "District" }],
+    lines: [{ lineName: "District" }, { lineName: "Circle" }],
     from: { nodeName: "TEMu_DIS", directions: ["EB", "WB"] },
     to: { nodeName: "BLFu_DIS", directions: ["EB", "WB"] },
-    path: [
-      { x: 547.8, y: 479.6 },
-      {
-        x: 553.3,
-        y: 477.3,
-        cp1: { x: 550, y: 479.6 },
-        cp2: { x: 551.9, y: 478.7 },
-      },
-    ],
+    path: [{ linkNodeName: "TEM-BLF" }],
   },
   {
     lines: [{ lineName: "Circle" }, { lineName: "District" }],
@@ -749,23 +715,15 @@ export const LINKS: Link[] = [
     to: { nodeName: "MANu_DIS", directions: ["EB", "WB"] },
   },
   {
-    lines: [{ lineName: "Circle" }, { lineName: "District" }],
+    lines: [{ lineName: "District" }, { lineName: "Circle" }],
     from: { nodeName: "MANu_DIS", directions: ["EB", "WB"] },
     to: { nodeName: "CSTu_DIS", directions: ["EB", "WB"] },
   },
   {
-    lines: [{ lineName: "Circle" }, { lineName: "District" }],
+    lines: [{ lineName: "District" }, { lineName: "Circle" }],
     from: { nodeName: "CSTu_DIS", directions: ["EB", "WB"] },
     to: { nodeName: "BNKu_DIS", directions: ["EB", "WB"] },
-    path: [
-      { x: 591.7, y: 438.6 },
-      {
-        x: 595.5,
-        y: 436.5,
-        cp1: { x: 592.7, y: 437.6 },
-        cp2: { x: 594.1, y: 436.5 },
-      },
-    ],
+    path: [{ linkNodeName: "CST-BNK" }],
   },
   {
     lines: [{ lineName: "Circle" }, { lineName: "District" }],
@@ -776,43 +734,14 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Circle" }],
     from: { nodeName: "THLu_DIS", directions: ["EB", "WB"] },
     to: { nodeName: "ALDu_MET", directions: ["NB", "SB"] },
-    path: [
-      { x: 653.4, y: 436.5 },
-      {
-        x: 659,
-        y: 432,
-        cp1: { x: 659, y: 436.5 },
-        cp2: { x: 659, y: 433.5 },
-      },
-    ],
+    path: [{ linkNodeName: "THL-AL-0" }, { linkNodeName: "THL-AL-1" }],
   },
 
   {
     lines: [{ lineName: "H&C" }],
     from: { nodeName: "ALEu_DIS", directions: ["WB", "EB"] },
     to: { nodeName: "LSTu_MET", directions: ["NB", "SB"] },
-    path: [
-      { x: 676, y: 400.5 },
-      {
-        x: 671.4,
-        y: 402.7,
-        cp1: { x: 674.7, y: 401.9 },
-        cp2: { x: 673.7, y: 402.7 },
-      },
-      {
-        x: 666.7,
-        y: 400.5,
-        cp1: { x: 669.2, y: 402.7 },
-        cp2: { x: 668, y: 401.8 },
-      },
-      { x: 659.4, y: 393.2 },
-      {
-        x: 652.9,
-        y: 390.3,
-        cp1: { x: 657.5, y: 391.3 },
-        cp2: { x: 655, y: 390.3 },
-      },
-    ],
+    path: [{ linkNodeName: "ALEu-LSTu_MET" }, { linkNodeName: "AL-LSTu" }],
   },
   {
     lines: [
@@ -822,36 +751,14 @@ export const LINKS: Link[] = [
     ],
     from: { nodeName: "LSTu_MET", directions: ["NB", "SB"] },
     to: { nodeName: "MGTu_MET", directions: ["NB", "SB"] },
-    path: [
-      { x: 598.4, y: 390.3 },
-      {
-        x: 592.9,
-        y: 388,
-        cp1: { x: 596.2, y: 390.3 },
-        cp2: { x: 594.3, y: 389.4 },
-      },
-    ],
+    path: [],
   },
 
   {
     lines: [{ lineName: "Metropolitan" }, { lineName: "Circle" }],
     from: { nodeName: "ALDu_MET", directions: ["NB", "SB"] },
     to: { nodeName: "LSTu_MET", directions: ["NB", "SB"] },
-    path: [
-      { x: 658.8, y: 398.1 },
-      {
-        x: 656.5,
-        y: 392.6,
-        cp1: { x: 658.8, y: 395.9 },
-        cp2: { x: 657.9, y: 394 },
-      },
-      {
-        x: 651,
-        y: 390.3,
-        cp1: { x: 655.1, y: 391.2 },
-        cp2: { x: 653.1, y: 390.3 },
-      },
-    ],
+    path: [{ linkNodeName: "AL-LSTu" }],
   },
 
   {
@@ -859,26 +766,9 @@ export const LINKS: Link[] = [
     from: { nodeName: "THLu_DIS" },
     to: { nodeName: "ALEu_DIS" },
     path: [
-      { x: 651.9, y: 436.4 },
-      {
-        x: 659,
-        y: 433.5,
-        cp1: { x: 654.6, y: 436.4 },
-        cp2: { x: 657.1, y: 435.4 },
-      },
-      {
-        x: 661.9,
-        y: 426.4,
-        cp1: { x: 660.9, y: 431.6 },
-        cp2: { x: 661.9, y: 429.1 },
-      },
-      { x: 661.9, y: 417.2 },
-      {
-        x: 664.2,
-        y: 411.7,
-        cp1: { x: 661.9, y: 415.2 },
-        cp2: { x: 662.7, y: 413.2 },
-      },
+      { linkNodeName: "THL-AL-0" },
+      { linkNodeName: "THL-AL-1" },
+      { linkNodeName: "ALEu-LSTu_MET" },
     ],
   },
 ];
