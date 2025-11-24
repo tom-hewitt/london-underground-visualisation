@@ -677,6 +677,11 @@ export const LINK_NODES: Record<string, LinkNode> = {
   // Central
   "STP-BNK": { x: 584.5, y: 419.4 },
 
+  // Circle
+  "KXX-FAR": { x: 553.5, y: 348.7 },
+  "PAD-BAY": { x: 355.3, y: 356.425 },
+  "HST-GRD": { x: 355.3, y: 479.6 },
+
   // District
   "CST-BNK": { x: 594, y: 436.5 },
   "TEM-BLF": { x: 551.5, y: 479.6 },
@@ -914,6 +919,7 @@ export const LINKS: Link[] = [
     ],
     from: { nodeName: "FARu_MET", directions: ["NB", "SB"] },
     to: { nodeName: "KXXu_MET", directions: ["NB", "SB"] },
+    path: [{ linkNodeName: "KXX-FAR" }],
   },
   {
     lines: [
@@ -958,6 +964,7 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Circle" }],
     from: { nodeName: "HSTu_DIS", directions: ["WB", "EB"] },
     to: { nodeName: "GRDu_DIS", directions: ["EB", "WB"] },
+    path: [{ linkNodeName: "HST-GRD" }],
   },
 
   {
@@ -972,6 +979,7 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Circle" }, { lineName: "District" }],
     from: { nodeName: "PADu_DIS", directions: ["WB", "EB"] },
     to: { nodeName: "BAYu_DIS", directions: ["WB", "EB"] },
+    path: [{ linkNodeName: "PAD-BAY" }],
   },
   {
     lines: [{ lineName: "District" }, { lineName: "Circle" }],
