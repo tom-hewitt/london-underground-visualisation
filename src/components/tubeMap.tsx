@@ -583,7 +583,7 @@ function StationView({
     return null;
   }
 
-  const [firstNode, ...otherNodes] = nodes;
+  const [firstNode, ...otherNodes] = nodes.sort(([a], [b]) => a.x - b.x);
 
   return (
     <InterchangeStation
