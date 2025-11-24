@@ -70,6 +70,18 @@ export const STATIONS: Station[] = [
   { name: "Liverpool Street LU", nlc: 634, asc: "LSTu", interchange: true },
   { name: "Aldgate", nlc: 502, asc: "ALDu" },
   { name: "Moorgate", nlc: 645, asc: "MGTu", interchange: true },
+  { name: "Barbican", nlc: 501, asc: "BARu", interchange: true },
+  { name: "Farringdon", nlc: 577, asc: "FARu", interchange: true },
+  {
+    name: "King's Cross St. Pancras",
+    nlc: 625,
+    asc: "KXXu",
+    interchange: true,
+  },
+  { name: "Euston Square", nlc: 575, asc: "ESQu", interchange: true },
+  { name: "Great Portland Street", nlc: 588, asc: "GPSu" },
+  { name: "Baker Street", nlc: 511, asc: "BSTu", interchange: true },
+  { name: "Edgware Road", nlc: 569, asc: "ERDu", interchange: true },
 
   { name: "Oval", nlc: 668, asc: "OVLu", interchange: true },
   { name: "Kennington", nlc: 616, asc: "KENu", interchange: true },
@@ -373,6 +385,26 @@ export const STATION_NODES: Record<string, StationNode> = {
     x: 679.29,
     y: 396.67,
   },
+  ERDu_DIS: {
+    name: "ERDu_DIS",
+    station: { nlc: 569 },
+    x: 382.7,
+    y: 347.6,
+  },
+
+  // H&C
+  BSTu_HAM: {
+    name: "BSTu_HAM",
+    station: { nlc: 511 },
+    x: 438.9,
+    y: 348.7,
+  },
+  PADu_HAM: {
+    name: "PADu_HAM",
+    station: { nlc: 670 },
+    x: 349.2,
+    y: 347.6,
+  },
 
   // Jubilee
   SWKu_JUB: {
@@ -406,6 +438,42 @@ export const STATION_NODES: Record<string, StationNode> = {
     station: { nlc: 645 },
     x: 592.2,
     y: 387.2,
+  },
+  LSTu_MET: {
+    name: "LSTu_MET",
+    station: { nlc: 634 },
+    x: 611.6,
+    y: 390.3,
+  },
+  BARu_MET: {
+    name: "BARu_MET",
+    station: { nlc: 501 },
+    x: 579,
+    y: 374.2,
+  },
+  FARu_MET: {
+    name: "FARu_MET",
+    station: { nlc: 577 },
+    x: 566.1,
+    y: 361.2,
+  },
+  KXXu_MET: {
+    name: "KXXu_MET",
+    station: { nlc: 625 },
+    x: 543.6,
+    y: 348.7,
+  },
+  ESQu_MET: {
+    name: "ESQu_MET",
+    station: { nlc: 575 },
+    x: 490.5,
+    y: 348.7,
+  },
+  GPSu_MET: {
+    name: "GPSu_MET",
+    station: { nlc: 588 },
+    x: 458.15,
+    y: 348.7,
   },
 
   // Northern
@@ -450,14 +518,6 @@ export const STATION_NODES: Record<string, StationNode> = {
     station: { nlc: 645 },
     x: 602.5,
     y: 377,
-  },
-
-  // Metropolitan
-  LSTu_MET: {
-    name: "LSTu_MET",
-    station: { nlc: 634 },
-    x: 611.6,
-    y: 390.3,
   },
 
   // Waterloo & City
@@ -575,6 +635,10 @@ export const LINK_NODES: Record<string, LinkNode> = {
   "AL-LSTu": { x: 657.7, y: 390.3 },
 
   "MGT-LST": { x: 595.5, y: 390.3 }, // TODO: this doesn't work if LST-MGT - some weird alphabetic stuff going on
+
+  // Waterloo & City
+  "WLO-BNK-0": { x: 550.5, y: 511.6 },
+  "WLO-BNK-1": { x: 584.5, y: 476 },
 };
 
 export const LINK_SECTIONS: Record<string, LinkSection> = {
@@ -694,7 +758,11 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Waterloo & City" }],
     from: { nodeName: "WLOu_WAC" },
     to: { nodeName: "BNKu_WAC" },
-    path: [{ linkNodeName: "STP-BNK" }],
+    path: [
+      { linkNodeName: "WLO-BNK-0" },
+      { linkNodeName: "WLO-BNK-1" },
+      { linkNodeName: "STP-BNK" },
+    ],
   },
 
   // Circle
@@ -757,6 +825,66 @@ export const LINKS: Link[] = [
     from: { nodeName: "LSTu_MET", directions: ["NB", "SB"] },
     to: { nodeName: "MGTu_MET", directions: ["NB", "SB"] },
     path: [{ linkNodeName: "MGT-LST" }],
+  },
+  {
+    lines: [
+      { lineName: "Metropolitan" },
+      { lineName: "Circle" },
+      { lineName: "H&C" },
+    ],
+    from: { nodeName: "MGTu_MET", directions: ["NB", "SB"] },
+    to: { nodeName: "BARu_MET", directions: ["NB", "SB"] },
+  },
+  {
+    lines: [
+      { lineName: "H&C" },
+      { lineName: "Circle" },
+      { lineName: "Metropolitan" },
+    ],
+    from: { nodeName: "BARu_MET", directions: ["NB", "SB"] },
+    to: { nodeName: "FARu_MET", directions: ["NB", "SB"] },
+  },
+  {
+    lines: [
+      { lineName: "H&C" },
+      { lineName: "Circle" },
+      { lineName: "Metropolitan" },
+    ],
+    from: { nodeName: "FARu_MET", directions: ["NB", "SB"] },
+    to: { nodeName: "KXXu_MET", directions: ["NB", "SB"] },
+  },
+  {
+    lines: [
+      { lineName: "Metropolitan" },
+      { lineName: "Circle" },
+      { lineName: "H&C" },
+    ],
+    from: { nodeName: "KXXu_MET", directions: ["NB", "SB"] },
+    to: { nodeName: "ESQu_MET", directions: ["NB", "SB"] },
+  },
+  {
+    lines: [
+      { lineName: "H&C" },
+      { lineName: "Circle" },
+      { lineName: "Metropolitan" },
+    ],
+    from: { nodeName: "ESQu_MET", directions: ["NB", "SB"] },
+    to: { nodeName: "GPSu_MET", directions: ["NB", "SB"] },
+  },
+  {
+    lines: [{ lineName: "Circle" }, { lineName: "H&C" }],
+    from: { nodeName: "GPSu_MET", directions: ["NB", "SB"] },
+    to: { nodeName: "BSTu_HAM", directions: ["WB", "EB"] },
+  },
+  {
+    lines: [{ lineName: "H&C" }, { lineName: "Circle" }],
+    from: { nodeName: "BSTu_HAM", directions: ["WB", "EB"] },
+    to: { nodeName: "ERDu_DIS", directions: ["WB", "EB"] },
+  },
+  {
+    lines: [{ lineName: "H&C" }, { lineName: "Circle" }],
+    from: { nodeName: "ERDu_DIS", directions: ["WB", "EB"] },
+    to: { nodeName: "PADu_HAM", directions: ["WB", "EB"] },
   },
 
   {
