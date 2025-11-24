@@ -386,6 +386,24 @@ export const STATION_NODES: Record<string, StationNode> = {
     x: 429.2,
     y: 357.9,
   },
+  MYBu_BAK: {
+    name: "MYBu_BAK",
+    station: { nlc: 641 },
+    x: 399.8,
+    y: 341.1,
+  },
+  ERBu_BAK: {
+    name: "ERBu_BAK",
+    station: { nlc: 774 },
+    x: 365.5,
+    y: 341.2,
+  },
+  PADu_BAK: {
+    name: "PADu_BAK",
+    station: { nlc: 670 },
+    x: 342.8,
+    y: 341.2,
+  },
 
   // Central
   QWYu_CEN: {
@@ -962,6 +980,7 @@ export const LINK_NODES: Record<string, LinkNode> = {
   "EMB-CHX": { x: 509.5, y: 460.5 },
   "PIC-OXC": { x: 461.7, y: 412 },
   "OXC-RPK": { x: 461.7, y: 390.5 },
+  "BST-MYB": { x: 412.5, y: 341.1 },
 
   // Central
   "QWY-LAN": { x: 397, y: 419.4 },
@@ -1099,6 +1118,22 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Bakerloo" }],
     from: { nodeName: "RPKu_BAK" },
     to: { nodeName: "BSTu_BAK" },
+  },
+  {
+    lines: [{ lineName: "Bakerloo" }],
+    from: { nodeName: "BSTu_BAK" },
+    to: { nodeName: "MYBu_BAK" },
+    path: [{ linkNodeName: "BST-MYB" }],
+  },
+  {
+    lines: [{ lineName: "Bakerloo" }],
+    from: { nodeName: "MYBu_BAK" },
+    to: { nodeName: "ERBu_BAK" },
+  },
+  {
+    lines: [{ lineName: "Bakerloo" }],
+    from: { nodeName: "ERBu_BAK" },
+    to: { nodeName: "PADu_BAK" },
   },
 
   // Jubilee
