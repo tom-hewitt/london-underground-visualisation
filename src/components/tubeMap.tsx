@@ -805,7 +805,7 @@ function StationLabelView({
 
   return (
     <>
-      {linePositions.map(({ text, x, y }) => (
+      {linePositions.map(({ text, x, y }, i) => (
         <text
           className={cabin.className}
           fill="#2E2B81"
