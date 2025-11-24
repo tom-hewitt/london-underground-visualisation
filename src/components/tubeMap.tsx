@@ -12,6 +12,7 @@ import {
 } from "@/data/map";
 import {
   Alignment,
+  LineReference,
   Link,
   LinkLoad,
   LinkReference,
@@ -30,63 +31,65 @@ export function TubeMapVisualisation({
 }: {
   data: Record<string, LinkLoad>;
 }) {
-  const totalLinkLoads: [Link, number][] = useMemo(
+  const totalLinkLoads: [Link, Record<string, number>][] = useMemo(
     () =>
-      LINKS.map((link) => {
-        const linkLoads = linkNames(link).map((name) => data[name]);
-        const totalLoad = sum(linkLoads, (d) => d.total);
-        return [link, totalLoad];
-      }),
+      LINKS.map((link) => [
+        link,
+        Object.fromEntries(
+          link.lines.map((line) => {
+            const linkLoads = linkNames(line, link.from, link.to).map(
+              (name) => {
+                if (name in data) {
+                  return data[name];
+                } else {
+                  throw new Error(`Missing load data for link: ${name}`);
+                }
+              }
+            );
+            let totalLoad = sum(linkLoads, (d) => d.total);
+            // Hack to split H&C and Circle load
+            if (
+              link.lines.some((l) => l.lineName === "H&C") &&
+              link.lines.some((l) => l.lineName === "Circle")
+            ) {
+              totalLoad = totalLoad / 2;
+            }
+            return [line.lineName, totalLoad];
+          })
+        ),
+      ]),
     [data]
   );
 
   // Maps station nodes to the links connected to it and their total loads
-  const stationNodeLinks: Record<string, [StationNode, [Link, number][]]> =
-    useMemo(
-      () =>
-        Object.fromEntries(
-          Object.entries(STATION_NODES).map(([_, node]) => [
-            node.name,
-            [
-              node,
-              totalLinkLoads.filter(
-                ([link]) =>
-                  resolveStationNodeReference(link.to).nodeName === node.name ||
-                  resolveStationNodeReference(link.from).nodeName === node.name
-              ),
-            ],
-          ])
-        ),
-      [totalLinkLoads]
-    );
-
-  const adjacentLinks: Record<
+  const stationNodeLinks: Record<
     string,
-    Record<string, [Link, number][]>
-  > = useMemo(() => {
-    const adjacentLinks: Record<string, Record<string, [Link, number][]>> = {};
-
-    for (const [link, totalLoad] of totalLinkLoads) {
-      const from = resolveStationNodeReference(link.from);
-      const to = resolveStationNodeReference(link.to);
-
-      if (!adjacentLinks[from.nodeName]) {
-        adjacentLinks[from.nodeName] = {};
-      }
-      if (!adjacentLinks[from.nodeName][to.nodeName]) {
-        adjacentLinks[from.nodeName][to.nodeName] = [];
-      }
-      adjacentLinks[from.nodeName][to.nodeName].push([link, totalLoad]);
-    }
-
-    return adjacentLinks;
-  }, [totalLinkLoads]);
+    [StationNode, [Link, Record<string, number>][]]
+  > = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(STATION_NODES).map(([_, node]) => [
+          node.name,
+          [
+            node,
+            totalLinkLoads.filter(
+              ([link]) =>
+                resolveStationNodeReference(link.to).nodeName === node.name ||
+                resolveStationNodeReference(link.from).nodeName === node.name
+            ),
+          ],
+        ])
+      ),
+    [totalLinkLoads]
+  );
 
   const widthScale = useMemo(() => {
     const maxNodeTotal =
       max(
         Object.values(stationNodeLinks)
-          .map(([, links]) => sum(links.map(([, w]) => w)))
+          .map(([, links]) =>
+            sum(links, ([, lineLoads]) => sum(Object.values(lineLoads)))
+          )
           .flat()
       ) ?? 0;
     return scaleLinear().domain([0, maxNodeTotal]).range([1, 10]);
@@ -96,32 +99,35 @@ export function TubeMapVisualisation({
 
   return (
     <svg viewBox="0 0 945 670" width={945} height={670}>
-      {Object.entries(adjacentLinks).map(([, toNodes]) =>
-        Object.entries(toNodes).map(([, links]) => {
-          const widths = links.map(([, load]) => widthScale(load));
-          const totalWidth = sum(widths);
-          let currentPos = -totalWidth / 2;
+      {Object.values(totalLinkLoads).map(([link, lineLoads]) => {
+        const widths = Object.values(lineLoads).map(widthScale);
+        const totalWidth = sum(widths);
+        let currentPos = -totalWidth / 2;
 
-          const offsets = widths.map((width) => {
-            const offset = currentPos + width / 2;
-            currentPos += width;
-            return offset;
-          });
+        const offsets = widths.map((width) => {
+          const offset = currentPos + width / 2;
+          currentPos += width;
+          return offset;
+        });
 
-          return zip(links, offsets).map(([[link, totalLoad], offset]) => {
+        return zip(Object.entries(lineLoads), offsets).map(
+          ([[lineName, lineLoad], offset]) => {
             const hovered =
               hoveredItem?.type === "link" &&
               hoveredItem.link.from.nodeName === link.from.nodeName &&
               hoveredItem.link.to.nodeName === link.to.nodeName &&
-              hoveredItem.link.line.lineName === link.line.lineName;
+              hoveredItem.link.line.lineName === lineName;
             const setHovered = (hovered: boolean) => {
               if (hovered) {
-                setHoveredItem({ type: "link", link });
+                setHoveredItem({
+                  type: "link",
+                  link: { ...link, line: { lineName } },
+                });
               } else if (
                 hoveredItem?.type === "link" &&
                 hoveredItem.link.from.nodeName === link.from.nodeName &&
                 hoveredItem.link.to.nodeName === link.to.nodeName &&
-                hoveredItem.link.line.lineName === link.line.lineName
+                hoveredItem.link.line.lineName === lineName
               ) {
                 setHoveredItem(null);
               }
@@ -129,17 +135,18 @@ export function TubeMapVisualisation({
 
             return (
               <LinkView
-                key={`${link.from.nodeName}-${link.to.nodeName}-${link.line.lineName}`}
+                key={`${link.from.nodeName}-${link.to.nodeName}-${lineName}`}
                 link={link}
-                width={widthScale(totalLoad)}
+                line={{ lineName }}
+                width={widthScale(lineLoad)}
                 offset={offset}
                 hovered={hovered}
                 setHovered={setHovered}
               />
             );
-          });
-        })
-      )}
+          }
+        );
+      })}
       {STATIONS.map((station) => {
         const nodes = Object.values(stationNodeLinks).filter(
           ([node]) => node.station.nlc === station.nlc
@@ -245,6 +252,7 @@ const getNormal = (
 
 function LinkView({
   link,
+  line,
   width = 2,
   offset = 0,
   outlineWidth = 0.6,
@@ -252,6 +260,7 @@ function LinkView({
   setHovered,
 }: {
   link: Link;
+  line: LineReference;
   width?: number;
   offset?: number;
   outlineWidth?: number;
@@ -338,7 +347,7 @@ function LinkView({
     return linkPath.toString();
   }, [link, offset]);
 
-  const colour = useMemo(() => LINES[link.line.lineName].colour, [link.line]);
+  const colour = useMemo(() => LINES[line.lineName].colour, [line]);
 
   return (
     <>
@@ -372,7 +381,7 @@ function StationView({
   setHovered,
 }: {
   station: Station;
-  nodes: [StationNode, [Link, number][]][];
+  nodes: [StationNode, [Link, Record<string, number>][]][];
   scale: (n: number) => number;
   hovered?: boolean;
   setHovered: (hovered: boolean) => void;
@@ -401,7 +410,7 @@ function InterchangeStation({
   hovered,
   setHovered,
 }: {
-  nodes: NonEmptyArray<[StationNode, [Link, number][]]>;
+  nodes: NonEmptyArray<[StationNode, [Link, Record<string, number>][]]>;
   outlineWidth?: number;
   joinWidth?: number;
   scale: (n: number) => number;
@@ -417,7 +426,7 @@ function InterchangeStation({
 
   const nodeWidths: [StationNode, number][] = nodes.map(([node, links]) => [
     node,
-    scale(sum(links.map(([, width]) => width))),
+    scale(sum(links, ([, lineLoads]) => sum(Object.values(lineLoads)))),
   ]);
 
   return (
@@ -475,7 +484,7 @@ function StationLabelView({
   name: string;
   position:
     | {
-        node: [StationNode, [Link, number][]];
+        node: [StationNode, [Link, Record<string, number>][]];
       }
     | {
         x: number;
@@ -493,7 +502,7 @@ function StationLabelView({
   if ("node" in position) {
     let [stationNode, links] = position.node;
 
-    const total = sum(links.map(([, w]) => w));
+    const total = sum(links, ([, lineLoads]) => sum(Object.values(lineLoads)));
 
     switch (alignment.textAnchor) {
       case "start":

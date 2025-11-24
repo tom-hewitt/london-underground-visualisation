@@ -57,7 +57,7 @@ export interface LineReference {
 }
 
 export interface Link {
-  line: LineReference;
+  lines: LineReference[];
   from: StationNodeReference & { directions?: [string, string] };
   to: StationNodeReference & { directions?: [string, string] };
   path?: PathNode[];
