@@ -3,26 +3,46 @@ import { range } from "radash";
 
 export interface Station {
   name: string;
-  displayName?: string;
   nlc: number;
   asc: string;
+  interchange?: boolean;
 }
 
 export interface StationReference {
   nlc: number;
 }
 
+export interface StationLabel {
+  name: string;
+  station: StationReference;
+  position: StationLabelPosition;
+  alignment: Alignment;
+}
+
+export type StationLabelPosition =
+  | {
+      x: number;
+      y: number;
+    }
+  | {
+      node: StationNodeReference;
+    };
+
+export interface Alignment {
+  textAnchor: "start" | "middle" | "end";
+  dominantBaseline: "text-before-edge" | "middle" | "text-after-edge";
+}
+
 /// Represents a specific station node on the map. A station can have multiple nodes, e.g. Paddington.
 export interface StationNode {
   name: string;
   station: StationReference;
-  interchange?: boolean;
   x: number;
   y: number;
 }
 
 export interface StationNodeReference {
-  name: string;
+  nodeName: string;
 }
 
 export interface Line {
@@ -33,7 +53,7 @@ export interface Line {
 }
 
 export interface LineReference {
-  name: string;
+  lineName: string;
 }
 
 export interface Link {
@@ -43,9 +63,16 @@ export interface Link {
   path?: PathNode[];
 }
 
+export interface LinkReference {
+  from: StationNodeReference;
+  to: StationNodeReference;
+}
+
 export interface PathNode {
   x: number;
   y: number;
+  cp1?: { x: number; y: number };
+  cp2?: { x: number; y: number };
 }
 
 export interface LinkLoad {
@@ -82,3 +109,5 @@ export const QUARTER_HOURS = range(0, 24).flatMap((hour) =>
     )
   )
 );
+
+export type NonEmptyArray<T> = [T, ...T[]];

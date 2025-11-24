@@ -2,6 +2,7 @@ import {
   Line,
   Link,
   Station,
+  StationLabel,
   StationNode,
   StationNodeReference,
 } from "./types";
@@ -9,16 +10,20 @@ import {
 export const STATIONS: Station[] = [
   {
     name: "Elephant & Castle LU",
-    displayName: "Elephant & Castle",
     nlc: 570,
     asc: "ELEu",
+    interchange: true,
   },
   { name: "Lambeth North", nlc: 628, asc: "LAMu" },
-  { name: "Waterloo LU", displayName: "Waterloo", nlc: 747, asc: "WLOu" },
-  { name: "Embankment", nlc: 542, asc: "EMBu" },
+  {
+    name: "Waterloo LU",
+    nlc: 747,
+    asc: "WLOu",
+    interchange: true,
+  },
+  { name: "Embankment", nlc: 542, asc: "EMBu", interchange: true },
   {
     name: "Charing Cross LU",
-    displayName: "Charing Cross",
     nlc: 718,
     asc: "CHXu",
   },
@@ -26,10 +31,9 @@ export const STATIONS: Station[] = [
   { name: "Oxford Circus", nlc: 669, asc: "OXCu" },
   { name: "Regent's Park", nlc: 685, asc: "RPKu" },
   { name: "Baker Street", nlc: 511, asc: "BSTu" },
-  { name: "Marylebone LU", displayName: "Marylebone", nlc: 641, asc: "MYBu" },
+  { name: "Marylebone LU", nlc: 641, asc: "MYBu" },
   {
     name: "Edgware Road (Bak)",
-    displayName: "Edgware Road",
     nlc: 774,
     asc: "ERBu",
   },
@@ -48,9 +52,94 @@ export const STATIONS: Station[] = [
   { name: "Kenton", nlc: 620, asc: "KETu" },
   { name: "Harrow & Wealdstone", nlc: 597, asc: "HAWu" },
 
-  { name: "Oval", nlc: 668, asc: "OVLu" },
+  { name: "Westminster", nlc: 761, asc: "WMSu", interchange: true },
 
-  { name: "Bank and Monument", nlc: 513, asc: "BNKu" },
+  { name: "Southwark", nlc: 784, asc: "SWKu", interchange: true },
+
+  { name: "Oval", nlc: 668, asc: "OVLu", interchange: true },
+  { name: "Kennington", nlc: 616, asc: "KENu", interchange: true },
+
+  { name: "Bank and Monument", nlc: 513, asc: "BNKu", interchange: true },
+];
+
+export const STATION_LABELS: StationLabel[] = [
+  {
+    name: "Oval",
+    station: { nlc: 668 },
+    position: {
+      node: { nodeName: "OVLu_NOR" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "text-after-edge",
+    },
+  },
+  {
+    name: "Kennington",
+    station: { nlc: 616 },
+    position: {
+      node: { nodeName: "KENu_NORx" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "text-after-edge",
+    },
+  },
+  {
+    name: "Elephant & Castle",
+    station: { nlc: 570 },
+    position: {
+      node: { nodeName: "ELEu_BAK" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
+    name: "Lambeth North",
+    station: { nlc: 628 },
+    position: {
+      node: { nodeName: "LAMu_BAK" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "middle",
+    },
+  },
+  {
+    name: "Waterloo",
+    station: { nlc: 747 },
+    position: {
+      node: { nodeName: "WLOu_JUB" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "middle",
+    },
+  },
+  {
+    name: "Embankment",
+    station: { nlc: 542 },
+    position: {
+      node: { nodeName: "EMBu_BAK" },
+    },
+    alignment: {
+      textAnchor: "start",
+      dominantBaseline: "text-after-edge",
+    },
+  },
+  {
+    name: "Westminster",
+    station: { nlc: 761 },
+    position: {
+      node: { nodeName: "WMSu_JUB" },
+    },
+    alignment: {
+      textAnchor: "end",
+      dominantBaseline: "middle",
+    },
+  },
 ];
 
 export const STATION_NODES: Record<string, StationNode> = {
@@ -58,7 +147,6 @@ export const STATION_NODES: Record<string, StationNode> = {
   ELEu_BAK: {
     name: "ELEu_BAK",
     station: { nlc: 570 },
-    interchange: true,
     x: 518.1,
     y: 581,
   },
@@ -71,14 +159,12 @@ export const STATION_NODES: Record<string, StationNode> = {
   WLOu_BAK: {
     name: "WLOu_BAK",
     station: { nlc: 747 },
-    interchange: true,
     x: 509.5,
     y: 511.5,
   },
   EMBu_BAK: {
     name: "EMBu_BAK",
     station: { nlc: 542 },
-    interchange: true,
     x: 509.5,
     y: 479.6,
   },
@@ -87,7 +173,6 @@ export const STATION_NODES: Record<string, StationNode> = {
   WMSu_DIS: {
     name: "WMSu_DIS",
     station: { nlc: 761 },
-    interchange: true,
     x: 482,
     y: 479.2,
   },
@@ -96,21 +181,18 @@ export const STATION_NODES: Record<string, StationNode> = {
   SWKu_JUB: {
     name: "SWKu_JUB",
     station: { nlc: 704 },
-    interchange: true,
     x: 531.5,
     y: 523.9,
   },
   WLOu_JUB: {
     name: "WLOu_JUB",
     station: { nlc: 747 },
-    interchange: true,
     x: 495.3,
     y: 511.5,
   },
   WMSu_JUB: {
     name: "WMSu_JUB",
     station: { nlc: 761 },
-    interchange: true,
     x: 482,
     y: 472.5,
   },
@@ -119,35 +201,30 @@ export const STATION_NODES: Record<string, StationNode> = {
   OVLu_NOR: {
     name: "OVLu_NOR",
     station: { nlc: 668 },
-    interchange: true,
     x: 490,
     y: 602.5,
   },
   KENu_NORx: {
     name: "KENu_NORx",
-    station: { nlc: 571 },
-    interchange: true,
+    station: { nlc: 616 },
     x: 502.6,
     y: 581.1,
   },
   KENu_NORb: {
     name: "KENu_NORb",
-    station: { nlc: 571 },
-    interchange: true,
+    station: { nlc: 616 },
     x: 510,
     y: 589.3,
   },
   WLOu_NOR: {
     name: "WLOu_NOR",
     station: { nlc: 747 },
-    interchange: true,
     x: 502.5,
     y: 511.5,
   },
   EMBu_NOR: {
     name: "EMBu_NOR",
     station: { nlc: 542 },
-    interchange: true,
     x: 502.5,
     y: 472.5,
   },
@@ -155,8 +232,7 @@ export const STATION_NODES: Record<string, StationNode> = {
   // Waterloo & City
   BNKu_WAC: {
     name: "BNKu_WAC",
-    station: { nlc: 558 },
-    interchange: true,
+    station: { nlc: 513 },
     x: 591.7,
     y: 413.8,
   },
@@ -171,11 +247,13 @@ export const STATION_NODE_ALIASES: Record<string, string> = {
 export function resolveStationNodeReference(
   reference: StationNodeReference
 ): StationNodeReference {
-  return { name: STATION_NODE_ALIASES[reference.name] ?? reference.name };
+  return {
+    nodeName: STATION_NODE_ALIASES[reference.nodeName] ?? reference.nodeName,
+  };
 }
 
 export function getStationNode(reference: StationNodeReference): StationNode {
-  return STATION_NODES[resolveStationNodeReference(reference).name];
+  return STATION_NODES[resolveStationNodeReference(reference).nodeName];
 }
 
 export const LINES: Record<string, Line> = {
@@ -214,39 +292,44 @@ export const LINES: Record<string, Line> = {
 export const LINKS: Link[] = [
   // Bakerloo
   {
-    line: { name: "Bakerloo" },
-    from: { name: "ELEu_BAK" },
-    to: { name: "LAMu_BAK" },
+    line: { lineName: "Bakerloo" },
+    from: { nodeName: "ELEu_BAK" },
+    to: { nodeName: "LAMu_BAK" },
     path: [
       { x: 511.8, y: 574.7 },
       { x: 509.5, y: 569.3 },
     ],
   },
   {
-    line: { name: "Bakerloo" },
-    from: { name: "LAMu_BAK" },
-    to: { name: "WLOu_BAK" },
+    line: { lineName: "Bakerloo" },
+    from: { nodeName: "LAMu_BAK" },
+    to: { nodeName: "WLOu_BAK" },
   },
   {
-    line: { name: "Bakerloo" },
-    from: { name: "WLOu_BAK" },
-    to: { name: "EMBu_BAK" },
+    line: { lineName: "Bakerloo" },
+    from: { nodeName: "WLOu_BAK" },
+    to: { nodeName: "EMBu_BAK" },
   },
 
   // Jubilee
   {
-    line: { name: "Jubilee" },
-    from: { name: "SWKu_JUB" },
-    to: { name: "WLOu_JUB" },
+    line: { lineName: "Jubilee" },
+    from: { nodeName: "SWKu_JUB" },
+    to: { nodeName: "WLOu_JUB" },
     path: [
-      { x: 502.9, y: 523.9 },
-      { x: 495.3, y: 516.3 },
+      {
+        x: 502.9,
+        y: 523.9,
+        cp1: { x: 502.9, y: 523.9 },
+        cp2: { x: 498.7, y: 423.9 },
+      },
+      { x: 495.3, y: 516.3, cp1: { x: 495.3, y: 520.5 } },
     ],
   },
   {
-    line: { name: "Jubilee" },
-    from: { name: "WLOu_JUB" },
-    to: { name: "WMSu_JUB" },
+    line: { lineName: "Jubilee" },
+    from: { nodeName: "WLOu_JUB" },
+    to: { nodeName: "WMSu_JUB" },
     path: [
       { x: 495.4, y: 488.9 },
       { x: 493.1, y: 483.5 },
@@ -255,51 +338,51 @@ export const LINKS: Link[] = [
 
   // Northern
   {
-    line: { name: "Northern" },
-    from: { name: "OVLu_NOR" },
-    to: { name: "KENu_NORx" },
+    line: { lineName: "Northern" },
+    from: { nodeName: "OVLu_NOR" },
+    to: { nodeName: "KENu_NORx" },
     path: [
       { x: 492.8, y: 596.7 },
       { x: 495.1, y: 590.9 },
     ],
   },
   {
-    line: { name: "Northern" },
-    from: { name: "OVLu_NOR" },
-    to: { name: "KENu_NORb" },
+    line: { lineName: "Northern" },
+    from: { nodeName: "OVLu_NOR" },
+    to: { nodeName: "KENu_NORb" },
     path: [
       { x: 495.9, y: 599.9 },
       { x: 501.7, y: 597.6 },
     ],
   },
   {
-    line: { name: "Northern" },
-    from: { name: "KENu_NORb" },
-    to: { name: "ELEu_NOR" },
+    line: { lineName: "Northern" },
+    from: { nodeName: "KENu_NORb" },
+    to: { nodeName: "ELEu_NOR" },
   },
   {
-    line: { name: "Northern" },
-    from: { name: "KENu_NORx" },
-    to: { name: "WLOu_NOR" },
+    line: { lineName: "Northern" },
+    from: { nodeName: "KENu_NORx" },
+    to: { nodeName: "WLOu_NOR" },
   },
   {
-    line: { name: "Northern" },
-    from: { name: "WLOu_NOR" },
-    to: { name: "EMBu_NOR" },
+    line: { lineName: "Northern" },
+    from: { nodeName: "WLOu_NOR" },
+    to: { nodeName: "EMBu_NOR" },
   },
 
   // District
   {
-    line: { name: "District" },
-    from: { name: "WMSu_DIS" },
-    to: { name: "EMBu_DIS" },
+    line: { lineName: "District" },
+    from: { nodeName: "WMSu_DIS" },
+    to: { nodeName: "EMBu_DIS" },
   },
 
   // Waterloo & City
   {
-    line: { name: "Waterloo & City" },
-    from: { name: "WLOu_WAC" },
-    to: { name: "BNKu_WAC" },
+    line: { lineName: "Waterloo & City" },
+    from: { nodeName: "WLOu_WAC" },
+    to: { nodeName: "BNKu_WAC" },
     path: [
       { x: 547.7, y: 511.6 },
       { x: 553.1, y: 509.3 },
@@ -312,12 +395,12 @@ export const LINKS: Link[] = [
 ];
 
 export function linkNames(link: Link): string[] {
-  const line = LINES[link.line.name];
+  const line = LINES[link.line.lineName];
 
   const [forwardDirection, backwardDirection] = line.directions;
 
   return [
-    `${link.from.name}_${forwardDirection}>${link.to.name}_${forwardDirection}@${line.abbreviation}`,
-    `${link.to.name}_${backwardDirection}>${link.from.name}_${backwardDirection}@${line.abbreviation}`,
+    `${link.from.nodeName}_${forwardDirection}>${link.to.nodeName}_${forwardDirection}@${line.abbreviation}`,
+    `${link.to.nodeName}_${backwardDirection}>${link.from.nodeName}_${backwardDirection}@${line.abbreviation}`,
   ];
 }
