@@ -27,6 +27,7 @@ import {
 import { cumsum, max, path, scaleLinear, select, sum, zoom } from "d3";
 import { zip } from "radash";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 export function TubeMapVisualisation({
   data,
@@ -267,7 +268,8 @@ function TubeMapDisplay({ data }: { data: Record<string, LinkLoad> }) {
                   link={link}
                   line={{ lineName }}
                   linkSectionOffsets={linkSectionOffsets}
-                  width={widthScale(lineLoad)}
+                  load={lineLoad}
+                  scale={widthScale}
                   hovered={hovered}
                   setHovered={setHovered}
                 />
@@ -451,7 +453,8 @@ function LinkView({
   link,
   line,
   linkSectionOffsets,
-  width = 2,
+  load,
+  scale,
   outlineWidth = 0.6,
   radius = 10,
   hovered,
@@ -460,12 +463,15 @@ function LinkView({
   link: Link;
   line: LineReference;
   linkSectionOffsets: Record<string, Record<string, number>>;
-  width?: number;
+  load: number;
+  scale: (n: number) => number;
   outlineWidth?: number;
   radius?: number;
   hovered?: boolean;
   setHovered: (hovered: boolean) => void;
 }) {
+  const width = scale(load);
+
   const debugPath = useMemo(() => {
     const linkPath = path();
 
@@ -575,6 +581,11 @@ function LinkView({
 
   const colour = useMemo(() => LINES[line.lineName].colour, [line]);
 
+  const [mousePosition, setMousePosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+
   return (
     <>
       {hovered ? (
@@ -595,7 +606,55 @@ function LinkView({
         fill="none"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
+        onMouseMove={(event) =>
+          setMousePosition({ x: event.pageX, y: event.pageY })
+        }
       />
+      {hovered && mousePosition
+        ? createPortal(
+            <div
+              className={cabin.className}
+              style={{
+                position: "absolute",
+                zIndex: 100,
+                left: mousePosition ? mousePosition.x + 10 : 0,
+                top: mousePosition ? mousePosition.y + 10 : 0,
+                display: "flex",
+                flexDirection: "row",
+                backgroundColor: "white",
+                border: "2px solid black",
+                gap: "4px",
+                paddingRight: "4px",
+              }}
+            >
+              <div style={{ width: "10px", backgroundColor: colour }} />
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div>
+                  <strong>
+                    {
+                      STATIONS.filter(
+                        ({ nlc }) =>
+                          nlc === getStationNode(link.from).station.nlc
+                      )[0].name
+                    }
+                  </strong>
+                  {" to "}
+                  <strong>
+                    {
+                      STATIONS.filter(
+                        ({ nlc }) => nlc === getStationNode(link.to).station.nlc
+                      )[0].name
+                    }
+                  </strong>
+                </div>
+                <span>{line.lineName}</span>
+              </div>
+              <div style={{ width: "8px" }} />
+              {Math.round(load).toLocaleString()} passengers
+            </div>,
+            document.body
+          )
+        : null}
       {/* <path
         d={debugPath}
         stroke="#FF00FF"
