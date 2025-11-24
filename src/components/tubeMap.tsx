@@ -492,25 +492,27 @@ function LinkView({
       // The cross product gives us the sine of the angle with sign indicating direction
       const crossProd = cross(dirToPrev, dirToNext);
 
-      // Avoid division by zero for straight lines
-      const denominator =
-        Math.abs(crossProd) < 1e-4
-          ? crossProd >= 0
-            ? 1e-4
-            : -1e-4
-          : crossProd;
+      let offsetCorner: { x: number; y: number };
 
-      // Calculate vectors u and v
-      // u is along B->A (dirToPrev), scaled by nextOffset / -denominator
-      // v is along B->C (dirToNext), scaled by previousOffset / -denominator
-      // We use -denominator because of the coordinate system / derivation.
+      if (Math.abs(crossProd) < 1e-4) {
+        const normal = { x: -dirToNext.y, y: dirToNext.x };
+        offsetCorner = {
+          x: corner.x - normal.x * nextOffset,
+          y: corner.y - normal.y * nextOffset,
+        };
+      } else {
+        // Calculate vectors u and v
+        // u is along B->A (dirToPrev), scaled by nextOffset / -denominator
+        // v is along B->C (dirToNext), scaled by previousOffset / -denominator
+        // We use -denominator because of the coordinate system / derivation.
 
-      const uVec = multiply(dirToPrev, nextOffset / denominator);
-      const vVec = multiply(dirToNext, previousOffset / denominator);
+        const uVec = multiply(dirToPrev, nextOffset / crossProd);
+        const vVec = multiply(dirToNext, previousOffset / crossProd);
 
-      // D = B + u + v
-      const offset = add(uVec, vVec);
-      const offsetCorner = add(corner, offset);
+        // D = B + u + v
+        const offset = add(uVec, vVec);
+        offsetCorner = add(corner, offset);
+      }
 
       linkPath.lineTo(offsetCorner.x, offsetCorner.y);
 
