@@ -33,6 +33,21 @@ export function TubeMapVisualisation({
 }: {
   data: Record<string, LinkLoad>;
 }) {
+  return (
+    <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+      <div style={{ padding: "16px" }}>
+        <h1 className={cabin.className} style={{ fontWeight: 800 }}>
+          Tube Map Visualisation
+        </h1>
+      </div>
+      <div style={{ display: "flex", flexGrow: 1 }}>
+        <TubeMapDisplay data={data} />
+      </div>
+    </div>
+  );
+}
+
+function TubeMapDisplay({ data }: { data: Record<string, LinkLoad> }) {
   const totalLinkLoads: [Link, Record<string, number>][] = useMemo(
     () =>
       LINKS.map((link) => [
@@ -210,7 +225,7 @@ export function TubeMapVisualisation({
   }, []);
 
   return (
-    <svg ref={svgRef} viewBox="0 0 945 670" width={945} height={670}>
+    <svg ref={svgRef} style={{ flexGrow: 1 }} viewBox="0 0 945 670">
       <g ref={gRef}>
         {Object.values(totalLinkLoads).map(([link, lineLoads]) => {
           const widths = Object.values(lineLoads).map(widthScale);
@@ -807,6 +822,7 @@ function StationLabelView({
     <>
       {linePositions.map(({ text, x, y }, i) => (
         <text
+          key={i}
           className={cabin.className}
           fill="#2E2B81"
           x={x}
