@@ -101,7 +101,16 @@ export const STATIONS: Station[] = [
   { name: "Edgware Road", nlc: 569, asc: "ERDu", interchange: true },
 
   { name: "Oval", nlc: 668, asc: "OVLu", interchange: true },
+  { name: "Battersea Power Station", nlc: 832, asc: "BPSu" },
+  { name: "Nine Elms", nlc: 831, asc: "NIEu" },
   { name: "Kennington", nlc: 616, asc: "KENu", interchange: true },
+  { name: "Leicester Square", nlc: 631, asc: "LSQu", interchange: true },
+  { name: "Goodge Street", nlc: 586, asc: "GSTu" },
+  { name: "Warren Street", nlc: 745, asc: "WSTu", interchange: true },
+  { name: "Euston LU", nlc: 574, asc: "EUSu", interchange: true },
+  { name: "Borough", nlc: 525, asc: "BORu" },
+  { name: "Old Street", nlc: 665, asc: "OLDu" },
+  { name: "Angel", nlc: 507, asc: "ANGu" },
 
   { name: "Bank and Monument", nlc: 513, asc: "BNKu", interchange: true },
 ];
@@ -645,6 +654,18 @@ export const STATION_NODES: Record<string, StationNode> = {
     x: 490,
     y: 602.5,
   },
+  BPSu_NOR: {
+    name: "BPSu_NOR",
+    station: { nlc: 832 },
+    x: 411.6,
+    y: 571.6,
+  },
+  NIEu_NOR: {
+    name: "NIEu_NOR",
+    station: { nlc: 831 },
+    x: 429.4,
+    y: 571.6,
+  },
   KENu_NORx: {
     name: "KENu_NORx",
     station: { nlc: 616 },
@@ -681,6 +702,60 @@ export const STATION_NODES: Record<string, StationNode> = {
     x: 602.5,
     y: 377,
   },
+  LSQu_NOR: {
+    name: "LSQu_NOR",
+    station: { nlc: 631 },
+    x: 502.5,
+    y: 424.8,
+  },
+  TCRu_NOR: {
+    name: "TCRu_NOR",
+    station: { nlc: 728 },
+    x: 502.5,
+    y: 394.1,
+  },
+  GSTu_NOR: {
+    name: "GSTu_NOR",
+    station: { nlc: 586 },
+    x: 502.5,
+    y: 385,
+  },
+  WSTu_NOR: {
+    name: "WSTu_NOR",
+    station: { nlc: 745 },
+    x: 502.5,
+    y: 359,
+  },
+  EUSu_NORx: {
+    name: "EUSu_NORx",
+    station: { nlc: 574 },
+    x: 514.4,
+    y: 325.4,
+  },
+  BORu_NOR: {
+    name: "BORu_NOR",
+    station: { nlc: 525 },
+    x: 567.4,
+    y: 531.8,
+  },
+  OLDu_NOR: {
+    name: "OLDu_NOR",
+    station: { nlc: 665 },
+    x: 602.5,
+    y: 354.2,
+  },
+  ANGu_NOR: {
+    name: "ANGu_NOR",
+    station: { nlc: 507 },
+    x: 576.2,
+    y: 344.3,
+  },
+  KXXu_NOR: {
+    name: "KXXu_NOR",
+    station: { nlc: 625 },
+    x: 553.3,
+    y: 339.2,
+  },
 
   // Waterloo & City
   BNKu_WAC: {
@@ -701,6 +776,8 @@ export const STATION_NODE_ALIASES: Record<string, string> = {
   NHGu_CEN: "NHGu_DIS",
   OXCu_BAK: "OXCu_CEN",
   BSTu_JUB: "BSTu_BAK",
+  CHXu_NOR: "CHXu_BAK",
+  LONu_NOR: "LONu_JUB",
 };
 
 export function resolveStationNodeReference(
@@ -806,7 +883,15 @@ export const LINK_NODES: Record<string, LinkNode> = {
   // Northern
   "OVLu_NOR-KENu_NOR-0": { x: 492.8, y: 599.9 },
   "OVLu_NOR-KENu_NORx-1": { x: 492.8, y: 593.25 },
+  "OVLu_NOR-KENu_NORx-2": { x: 498.5, y: 587.8 },
   "OVLu_NOR-KENu_NORb-1": { x: 499, y: 599.9 },
+  "NIE-KEN-0": { x: 458, y: 571.6 },
+  "NIE-KEN-1": { x: 474, y: 587.8 },
+  "WST-EUS-0": { x: 502.5, y: 352.5 },
+  "WST-EUS-1": { x: 514.4, y: 341 },
+  "BOR-LON": { x: 602.6, y: 496.5 },
+  "OLD-ANG": { x: 602.5, y: 344.3 },
+  "ANG-KXX": { x: 553.3, y: 344.3 },
 
   "THL-AL-0": { x: 659, y: 436.5 },
   "THL-AL-1": { x: 659, y: 418.5 },
@@ -937,6 +1022,7 @@ export const LINKS: Link[] = [
     path: [
       { linkNodeName: "OVLu_NOR-KENu_NOR-0" },
       { linkNodeName: "OVLu_NOR-KENu_NORx-1" },
+      { linkNodeName: "OVLu_NOR-KENu_NORx-2" },
     ],
   },
   {
@@ -946,6 +1032,21 @@ export const LINKS: Link[] = [
     path: [
       { linkNodeName: "OVLu_NOR-KENu_NOR-0" },
       { linkNodeName: "OVLu_NOR-KENu_NORb-1" },
+    ],
+  },
+  {
+    lines: [{ lineName: "Northern" }],
+    from: { nodeName: "BPSu_NOR" },
+    to: { nodeName: "NIEu_NOR" },
+  },
+  {
+    lines: [{ lineName: "Northern" }],
+    from: { nodeName: "NIEu_NOR" },
+    to: { nodeName: "KENu_NORx" },
+    path: [
+      { linkNodeName: "NIE-KEN-0" },
+      { linkNodeName: "NIE-KEN-1" },
+      { linkNodeName: "OVLu_NOR-KENu_NORx-2" },
     ],
   },
   {
@@ -963,11 +1064,74 @@ export const LINKS: Link[] = [
     from: { nodeName: "WLOu_NOR" },
     to: { nodeName: "EMBu_NOR" },
   },
-
+  {
+    lines: [{ lineName: "Northern" }],
+    from: { nodeName: "EMBu_NOR" },
+    to: { nodeName: "CHXu_NOR" },
+  },
+  {
+    lines: [{ lineName: "Northern" }],
+    from: { nodeName: "CHXu_NOR" },
+    to: { nodeName: "LSQu_NOR" },
+  },
+  {
+    lines: [{ lineName: "Northern" }],
+    from: { nodeName: "LSQu_NOR" },
+    to: { nodeName: "TCRu_NOR" },
+  },
+  {
+    lines: [{ lineName: "Northern" }],
+    from: { nodeName: "TCRu_NOR" },
+    to: { nodeName: "GSTu_NOR" },
+  },
+  {
+    lines: [{ lineName: "Northern" }],
+    from: { nodeName: "GSTu_NOR" },
+    to: { nodeName: "WSTu_NOR" },
+  },
+  {
+    lines: [{ lineName: "Northern" }],
+    from: { nodeName: "WSTu_NOR" },
+    to: { nodeName: "EUSu_NORx" },
+    path: [{ linkNodeName: "WST-EUS-0" }, { linkNodeName: "WST-EUS-1" }],
+  },
+  {
+    lines: [{ lineName: "Northern" }],
+    from: { nodeName: "ELEu_NOR" },
+    to: { nodeName: "BORu_NOR" },
+  },
+  {
+    lines: [{ lineName: "Northern" }],
+    from: { nodeName: "BORu_NOR" },
+    to: { nodeName: "LONu_NOR" },
+    path: [{ linkNodeName: "BOR-LON" }],
+  },
+  {
+    lines: [{ lineName: "Northern" }],
+    from: { nodeName: "LONu_NOR" },
+    to: { nodeName: "BNKu_NOR" },
+  },
   {
     lines: [{ lineName: "Northern" }],
     from: { nodeName: "BNKu_NOR" },
     to: { nodeName: "MGTu_NOR" },
+  },
+  {
+    lines: [{ lineName: "Northern" }],
+    from: { nodeName: "MGTu_NOR" },
+    to: { nodeName: "OLDu_NOR" },
+  },
+  {
+    lines: [{ lineName: "Northern" }],
+    from: { nodeName: "OLDu_NOR" },
+    to: { nodeName: "ANGu_NOR" },
+    path: [{ linkNodeName: "OLD-ANG" }],
+  },
+  {
+    lines: [{ lineName: "Northern" }],
+    from: { nodeName: "ANGu_NOR" },
+    to: { nodeName: "KXXu_NOR" },
+    path: [{ linkNodeName: "ANG-KXX" }],
   },
 
   // Central
