@@ -214,7 +214,13 @@ function LinkView({
     linkPath.moveTo(fromNode.x, fromNode.y);
 
     for (const node of pathNodes) {
-      linkPath.lineTo(node.x, node.y);
+      if ("cp1" in node || "cp2" in node) {
+        const cp1 = node.cp1 ?? { x: node.x, y: node.y };
+        const cp2 = node.cp2 ?? { x: node.x, y: node.y };
+        linkPath.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, node.x, node.y);
+      } else {
+        linkPath.lineTo(node.x, node.y);
+      }
     }
 
     linkPath.lineTo(toNode.x, toNode.y);
