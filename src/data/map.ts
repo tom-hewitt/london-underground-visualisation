@@ -62,6 +62,14 @@ export const STATIONS: Station[] = [
   { name: "Tower Hill", nlc: 731, asc: "THLu", interchange: true },
   { name: "Aldgate East", nlc: 503, asc: "ALEu" },
 
+  { name: "Bayswater", nlc: 517, asc: "BAYu" },
+  { name: "Notting Hill Gate", nlc: 663, asc: "NHGu", interchange: true },
+  { name: "Holland Park", nlc: 605, asc: "HST" },
+  { name: "Gloucester Road", nlc: 583, asc: "GRDu" },
+  { name: "South Kensington", nlc: 708, asc: "SKNu", interchange: true },
+  { name: "Sloane Square", nlc: 702, asc: "SSQu" },
+  { name: "Victoria LU", nlc: 741, asc: "VICu", interchange: true },
+  { name: "St James's Park", nlc: 695, asc: "SJPu" },
   { name: "Westminster", nlc: 761, asc: "WMSu", interchange: true },
 
   { name: "Southwark", nlc: 784, asc: "SWKu", interchange: true },
@@ -390,6 +398,60 @@ export const STATION_NODES: Record<string, StationNode> = {
     station: { nlc: 569 },
     x: 382.7,
     y: 347.6,
+  },
+  PADu_DIS: {
+    name: "PADu_DIS",
+    station: { nlc: 670 },
+    x: 358.1,
+    y: 356.425,
+  },
+  BAYu_DIS: {
+    name: "BAYu_DIS",
+    station: { nlc: 517 },
+    x: 355.3,
+    y: 391.25,
+  },
+  NHGu_DIS: {
+    name: "NHGu_DIS",
+    station: { nlc: 663 },
+    x: 355.3,
+    y: 419.5,
+  },
+  HSTu_DIS: {
+    name: "HSTu_DIS",
+    station: { nlc: 605 },
+    x: 355.3,
+    y: 443.75,
+  },
+  GRDu_DIS: {
+    name: "GRDu_DIS",
+    station: { nlc: 583 },
+    x: 373.15,
+    y: 479.6,
+  },
+  SKNu_DIS: {
+    name: "SKNu_DIS",
+    station: { nlc: 708 },
+    x: 387.5,
+    y: 479.6,
+  },
+  SSQu_DIS: {
+    name: "SSQu_DIS",
+    station: { nlc: 702 },
+    x: 414.65,
+    y: 479.6,
+  },
+  VICu_DIS: {
+    name: "VICu_DIS",
+    station: { nlc: 741 },
+    x: 434.4,
+    y: 479.6,
+  },
+  SJPu_DIS: {
+    name: "SJPu_DIS",
+    station: { nlc: 695 },
+    x: 454.45,
+    y: 479.6,
   },
 
   // H&C
@@ -888,10 +950,63 @@ export const LINKS: Link[] = [
   },
 
   {
+    lines: [{ lineName: "Circle" }], // TODO: Displayed as district and circle on map but no district data exists?
+    from: { nodeName: "ERDu_DIS", directions: ["WB", "EB"] },
+    to: { nodeName: "PADu_DIS", directions: ["WB", "EB"] },
+  },
+  {
+    lines: [{ lineName: "Circle" }],
+    from: { nodeName: "HSTu_DIS", directions: ["WB", "EB"] },
+    to: { nodeName: "GRDu_DIS", directions: ["EB", "WB"] },
+  },
+
+  {
     lines: [{ lineName: "Metropolitan" }, { lineName: "Circle" }],
     from: { nodeName: "ALDu_MET", directions: ["NB", "SB"] },
     to: { nodeName: "LSTu_MET", directions: ["NB", "SB"] },
     path: [{ linkNodeName: "AL-LSTu" }],
+  },
+
+  // District
+  {
+    lines: [{ lineName: "Circle" }, { lineName: "District" }],
+    from: { nodeName: "PADu_DIS", directions: ["WB", "EB"] },
+    to: { nodeName: "BAYu_DIS", directions: ["WB", "EB"] },
+  },
+  {
+    lines: [{ lineName: "District" }, { lineName: "Circle" }],
+    from: { nodeName: "BAYu_DIS", directions: ["WB", "EB"] },
+    to: { nodeName: "NHGu_DIS", directions: ["WB", "EB"] },
+  },
+  {
+    lines: [{ lineName: "Circle" }, { lineName: "District" }],
+    from: { nodeName: "NHGu_DIS", directions: ["WB", "EB"] },
+    to: { nodeName: "HSTu_DIS", directions: ["WB", "EB"] },
+  },
+  {
+    lines: [{ lineName: "District" }, { lineName: "Circle" }],
+    from: { nodeName: "GRDu_DIS", directions: ["EB", "WB"] },
+    to: { nodeName: "SKNu_DIS", directions: ["EB", "WB"] },
+  },
+  {
+    lines: [{ lineName: "District" }, { lineName: "Circle" }],
+    from: { nodeName: "SKNu_DIS", directions: ["EB", "WB"] },
+    to: { nodeName: "SSQu_DIS", directions: ["EB", "WB"] },
+  },
+  {
+    lines: [{ lineName: "District" }, { lineName: "Circle" }],
+    from: { nodeName: "SSQu_DIS", directions: ["EB", "WB"] },
+    to: { nodeName: "VICu_DIS", directions: ["EB", "WB"] },
+  },
+  {
+    lines: [{ lineName: "Circle" }, { lineName: "District" }],
+    from: { nodeName: "VICu_DIS", directions: ["EB", "WB"] },
+    to: { nodeName: "SJPu_DIS", directions: ["EB", "WB"] },
+  },
+  {
+    lines: [{ lineName: "District" }, { lineName: "Circle" }],
+    from: { nodeName: "SJPu_DIS", directions: ["EB", "WB"] },
+    to: { nodeName: "WMSu_DIS", directions: ["EB", "WB"] },
   },
 
   {
