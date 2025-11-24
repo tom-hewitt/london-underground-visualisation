@@ -578,6 +578,26 @@ export const STATION_NODES: Record<string, StationNode> = {
     y: 479.6,
   },
 
+  // Elizabeth
+  PADu_EZLc: {
+    name: "PADu_EZLc",
+    station: { nlc: 670 },
+    x: 371.9,
+    y: 369.3,
+  },
+  FARu_EZL: {
+    name: "FARu_EZL",
+    station: { nlc: 577 },
+    x: 558.6,
+    y: 367.8,
+  },
+  LSTu_EZLc: {
+    name: "LSTu_EZLc",
+    station: { nlc: 634 },
+    x: 611.5,
+    y: 367.8,
+  },
+
   // H&C
   BSTu_HAM: {
     name: "BSTu_HAM",
@@ -890,6 +910,8 @@ export const STATION_NODE_ALIASES: Record<string, string> = {
   LSQu_PIC: "LSQu_NOR",
   HOLu_PIC: "HOLu_CEN",
   KXXu_PIC: "KXXu_NOR",
+  BDSu_EZL: "BDSu_JUB",
+  TCRu_EZL: "TCRu_NOR",
 };
 
 export function resolveStationNodeReference(
@@ -922,6 +944,12 @@ export const LINES: Record<string, Line> = {
     abbreviation: "DIS",
     directions: ["EB", "WB"],
     colour: "#007336",
+  },
+  "Elizabeth Line": {
+    name: "Elizabeth Line",
+    abbreviation: "EZL",
+    directions: ["EB", "WB"],
+    colour: "#734293",
   },
   Northern: {
     name: "Northern",
@@ -997,6 +1025,10 @@ export const LINK_NODES: Record<string, LinkNode> = {
   // District
   "CST-BNK": { x: 594, y: 436.5 },
   "TEM-BLF": { x: 551.5, y: 479.6 },
+
+  // Elizabeth
+  "PAD-BDS": { x: 393, y: 369.3 },
+  "TCR-FAR": { x: 546.5, y: 367.8 },
 
   // Jubilee
   "LON-SWK-0": { x: 593.5, y: 481 },
@@ -1074,6 +1106,30 @@ export const LINK_SECTIONS: Record<string, LinkSection> = {
 };
 
 export const LINKS: Link[] = [
+  // Elizabeth
+  {
+    lines: [{ lineName: "Elizabeth Line" }],
+    from: { nodeName: "PADu_EZLc" },
+    to: { nodeName: "BDSu_EZL" },
+    path: [{ linkNodeName: "PAD-BDS" }],
+  },
+  {
+    lines: [{ lineName: "Elizabeth Line" }],
+    from: { nodeName: "BDSu_EZL" },
+    to: { nodeName: "TCRu_EZL" },
+  },
+  {
+    lines: [{ lineName: "Elizabeth Line" }],
+    from: { nodeName: "TCRu_EZL" },
+    to: { nodeName: "FARu_EZL" },
+    path: [{ linkNodeName: "TCR-FAR" }],
+  },
+  {
+    lines: [{ lineName: "Elizabeth Line" }],
+    from: { nodeName: "FARu_EZL" },
+    to: { nodeName: "LSTu_EZLc" },
+  },
+
   // Bakerloo
   {
     lines: [{ lineName: "Bakerloo" }],
