@@ -342,6 +342,30 @@ export const STATION_NODES: Record<string, StationNode> = {
     x: 509.5,
     y: 479.6,
   },
+  CHXu_BAK: {
+    name: "CHXu_BAK",
+    station: { nlc: 718 },
+    x: 502.4,
+    y: 453.4,
+  },
+  PICu_BAK: {
+    name: "PICu_BAK",
+    station: { nlc: 674 },
+    x: 481.3,
+    y: 432.2,
+  },
+  RPKu_BAK: {
+    name: "RPKu_BAK",
+    station: { nlc: 685 },
+    x: 447.7,
+    y: 376.5,
+  },
+  BSTu_BAK: {
+    name: "BSTu_BAK",
+    station: { nlc: 511 },
+    x: 429.2,
+    y: 357.9,
+  },
 
   // Central
   QWYu_CEN: {
@@ -655,6 +679,7 @@ export const STATION_NODE_ALIASES: Record<string, string> = {
   BNKu_CEN: "BNKu_WAC",
   LSTu_CEN: "LSTu_MET",
   NHGu_CEN: "NHGu_DIS",
+  OXCu_BAK: "OXCu_CEN",
 };
 
 export function resolveStationNodeReference(
@@ -730,6 +755,9 @@ export const LINES: Record<string, Line> = {
 export const LINK_NODES: Record<string, LinkNode> = {
   // Bakerloo
   "ELEu_BAK-LAMu_BAK-0": { x: 509.5, y: 572.5 },
+  "EMB-CHX": { x: 509.5, y: 460.5 },
+  "PIC-OXC": { x: 461.7, y: 412 },
+  "OXC-RPK": { x: 461.7, y: 390.5 },
 
   // Central
   "QWY-LAN": { x: 397, y: 419.4 },
@@ -811,6 +839,34 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Bakerloo" }],
     from: { nodeName: "WLOu_BAK" },
     to: { nodeName: "EMBu_BAK" },
+  },
+  {
+    lines: [{ lineName: "Bakerloo" }],
+    from: { nodeName: "EMBu_BAK" },
+    to: { nodeName: "CHXu_BAK" },
+    path: [{ linkNodeName: "EMB-CHX" }],
+  },
+  {
+    lines: [{ lineName: "Bakerloo" }],
+    from: { nodeName: "CHXu_BAK" },
+    to: { nodeName: "PICu_BAK" },
+  },
+  {
+    lines: [{ lineName: "Bakerloo" }],
+    from: { nodeName: "PICu_BAK" },
+    to: { nodeName: "OXCu_BAK" },
+    path: [{ linkNodeName: "PIC-OXC" }],
+  },
+  {
+    lines: [{ lineName: "Bakerloo" }],
+    from: { nodeName: "OXCu_BAK" },
+    to: { nodeName: "RPKu_BAK" },
+    path: [{ linkNodeName: "OXC-RPK" }],
+  },
+  {
+    lines: [{ lineName: "Bakerloo" }],
+    from: { nodeName: "RPKu_BAK" },
+    to: { nodeName: "BSTu_BAK" },
   },
 
   // Jubilee
