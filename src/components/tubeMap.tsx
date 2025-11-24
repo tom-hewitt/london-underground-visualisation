@@ -24,9 +24,9 @@ import {
   StationNode,
   StationReference,
 } from "@/data/types";
-import { cumsum, max, path, scaleLinear, sum } from "d3";
+import { cumsum, max, path, scaleLinear, select, sum, zoom } from "d3";
 import { zip } from "radash";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export function TubeMapVisualisation({
   data,
@@ -192,145 +192,164 @@ export function TubeMapVisualisation({
 
   const [hoveredItem, setHoveredItem] = useState<HoveredItem | null>(null);
 
+  const svgRef = useRef<SVGSVGElement>(null);
+  const gRef = useRef<SVGGElement>(null);
+
+  useEffect(() => {
+    if (!svgRef.current || !gRef.current) return;
+
+    const zoomBehavior = zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.5, 8])
+      .on("zoom", (event) => {
+        if (gRef.current) {
+          select(gRef.current).attr("transform", event.transform);
+        }
+      });
+
+    select(svgRef.current).call(zoomBehavior);
+  }, []);
+
   return (
-    <svg viewBox="0 0 945 670" width={945} height={670}>
-      {Object.values(totalLinkLoads).map(([link, lineLoads]) => {
-        const widths = Object.values(lineLoads).map(widthScale);
-        const totalWidth = sum(widths);
-        let currentPos = -totalWidth / 2;
+    <svg ref={svgRef} viewBox="0 0 945 670" width={945} height={670}>
+      <g ref={gRef}>
+        {Object.values(totalLinkLoads).map(([link, lineLoads]) => {
+          const widths = Object.values(lineLoads).map(widthScale);
+          const totalWidth = sum(widths);
+          let currentPos = -totalWidth / 2;
 
-        const offsets = widths.map((width) => {
-          const offset = currentPos + width / 2;
-          currentPos += width;
-          return offset;
-        });
+          const offsets = widths.map((width) => {
+            const offset = currentPos + width / 2;
+            currentPos += width;
+            return offset;
+          });
 
-        return zip(Object.entries(lineLoads), offsets).map(
-          ([[lineName, lineLoad], offset]) => {
-            const hovered =
-              hoveredItem?.type === "link" &&
-              hoveredItem.link.from.nodeName === link.from.nodeName &&
-              hoveredItem.link.to.nodeName === link.to.nodeName &&
-              hoveredItem.link.line.lineName === lineName;
-            const setHovered = (hovered: boolean) => {
-              if (hovered) {
-                setHoveredItem({
-                  type: "link",
-                  link: { ...link, line: { lineName } },
-                });
-              } else if (
+          return zip(Object.entries(lineLoads), offsets).map(
+            ([[lineName, lineLoad], offset]) => {
+              const hovered =
                 hoveredItem?.type === "link" &&
                 hoveredItem.link.from.nodeName === link.from.nodeName &&
                 hoveredItem.link.to.nodeName === link.to.nodeName &&
-                hoveredItem.link.line.lineName === lineName
-              ) {
-                setHoveredItem(null);
-              }
-            };
+                hoveredItem.link.line.lineName === lineName;
+              const setHovered = (hovered: boolean) => {
+                if (hovered) {
+                  setHoveredItem({
+                    type: "link",
+                    link: { ...link, line: { lineName } },
+                  });
+                } else if (
+                  hoveredItem?.type === "link" &&
+                  hoveredItem.link.from.nodeName === link.from.nodeName &&
+                  hoveredItem.link.to.nodeName === link.to.nodeName &&
+                  hoveredItem.link.line.lineName === lineName
+                ) {
+                  setHoveredItem(null);
+                }
+              };
+
+              return (
+                <LinkView
+                  key={`${link.from.nodeName}-${link.to.nodeName}-${lineName}`}
+                  link={link}
+                  line={{ lineName }}
+                  linkSectionOffsets={linkSectionOffsets}
+                  width={widthScale(lineLoad)}
+                  hovered={hovered}
+                  setHovered={setHovered}
+                />
+              );
+            }
+          );
+        })}
+        {STATIONS.map((station) => {
+          const nodes = Object.values(stationNodeLinks).filter(
+            ([node]) => node.station.nlc === station.nlc
+          );
+
+          const hovered =
+            hoveredItem?.type === "station" &&
+            hoveredItem.station.nlc === station.nlc;
+          const setHovered = (hovered: boolean) => {
+            if (hovered) {
+              setHoveredItem({
+                type: "station",
+                station: { nlc: station.nlc },
+                element: "node",
+              });
+            } else if (
+              hoveredItem?.type === "station" &&
+              hoveredItem.station.nlc === station.nlc &&
+              hoveredItem.element === "node"
+            ) {
+              setHoveredItem(null);
+            }
+          };
+
+          return (
+            <StationView
+              key={station.nlc}
+              station={station}
+              nodes={nodes}
+              scale={widthScale}
+              hovered={hovered}
+              setHovered={setHovered}
+            />
+          );
+        })}
+        {STATION_LABELS.map((label) => {
+          const hovered =
+            hoveredItem?.type === "station" &&
+            hoveredItem.station.nlc === label.station.nlc;
+          const setHovered = (hovered: boolean) => {
+            if (hovered) {
+              setHoveredItem({
+                type: "station",
+                station: { nlc: label.station.nlc },
+                element: "label",
+              });
+            } else if (
+              hoveredItem?.type === "station" &&
+              hoveredItem.station.nlc === label.station.nlc &&
+              hoveredItem.element === "label"
+            ) {
+              setHoveredItem(null);
+            }
+          };
+
+          const name = Array.isArray(label.name)
+            ? label.name.join(" ")
+            : label.name;
+
+          const key = `${label.station.nlc}-${name}`;
+
+          if ("node" in label.position) {
+            let node = stationNodeLinks[label.position.node.nodeName];
 
             return (
-              <LinkView
-                key={`${link.from.nodeName}-${link.to.nodeName}-${lineName}`}
-                link={link}
-                line={{ lineName }}
-                linkSectionOffsets={linkSectionOffsets}
-                width={widthScale(lineLoad)}
+              <StationLabelView
+                key={key}
+                name={label.name}
+                position={{ node }}
+                alignment={label.alignment}
+                scale={widthScale}
+                hovered={hovered}
+                setHovered={setHovered}
+              />
+            );
+          } else {
+            return (
+              <StationLabelView
+                key={key}
+                name={label.name}
+                position={label.position}
+                alignment={label.alignment}
+                scale={widthScale}
                 hovered={hovered}
                 setHovered={setHovered}
               />
             );
           }
-        );
-      })}
-      {STATIONS.map((station) => {
-        const nodes = Object.values(stationNodeLinks).filter(
-          ([node]) => node.station.nlc === station.nlc
-        );
-
-        const hovered =
-          hoveredItem?.type === "station" &&
-          hoveredItem.station.nlc === station.nlc;
-        const setHovered = (hovered: boolean) => {
-          if (hovered) {
-            setHoveredItem({
-              type: "station",
-              station: { nlc: station.nlc },
-              element: "node",
-            });
-          } else if (
-            hoveredItem?.type === "station" &&
-            hoveredItem.station.nlc === station.nlc &&
-            hoveredItem.element === "node"
-          ) {
-            setHoveredItem(null);
-          }
-        };
-
-        return (
-          <StationView
-            key={station.nlc}
-            station={station}
-            nodes={nodes}
-            scale={widthScale}
-            hovered={hovered}
-            setHovered={setHovered}
-          />
-        );
-      })}
-      {STATION_LABELS.map((label) => {
-        const hovered =
-          hoveredItem?.type === "station" &&
-          hoveredItem.station.nlc === label.station.nlc;
-        const setHovered = (hovered: boolean) => {
-          if (hovered) {
-            setHoveredItem({
-              type: "station",
-              station: { nlc: label.station.nlc },
-              element: "label",
-            });
-          } else if (
-            hoveredItem?.type === "station" &&
-            hoveredItem.station.nlc === label.station.nlc &&
-            hoveredItem.element === "label"
-          ) {
-            setHoveredItem(null);
-          }
-        };
-
-        const name = Array.isArray(label.name)
-          ? label.name.join(" ")
-          : label.name;
-
-        const key = `${label.station.nlc}-${name}`;
-
-        if ("node" in label.position) {
-          let node = stationNodeLinks[label.position.node.nodeName];
-
-          return (
-            <StationLabelView
-              key={key}
-              name={label.name}
-              position={{ node }}
-              alignment={label.alignment}
-              scale={widthScale}
-              hovered={hovered}
-              setHovered={setHovered}
-            />
-          );
-        } else {
-          return (
-            <StationLabelView
-              key={key}
-              name={label.name}
-              position={label.position}
-              alignment={label.alignment}
-              scale={widthScale}
-              hovered={hovered}
-              setHovered={setHovered}
-            />
-          );
-        }
-      })}
+        })}
+      </g>
     </svg>
   );
 }
