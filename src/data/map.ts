@@ -72,7 +72,9 @@ export const STATIONS: Station[] = [
   { name: "St James's Park", nlc: 695, asc: "SJPu" },
   { name: "Westminster", nlc: 761, asc: "WMSu", interchange: true },
 
+  { name: "London Bridge LU", nlc: 635, asc: "LONu", interchange: true },
   { name: "Southwark", nlc: 784, asc: "SWKu", interchange: true },
+  { name: "Green Park", nlc: 590, asc: "GPKu", interchange: true },
 
   { name: "Queensway", nlc: 681, asc: "QWYu" },
   { name: "Lancaster Gate", nlc: 629, asc: "LANu" },
@@ -549,6 +551,12 @@ export const STATION_NODES: Record<string, StationNode> = {
   },
 
   // Jubilee
+  LONu_JUB: {
+    name: "LONu_JUB",
+    station: { nlc: 635 },
+    x: 602.3,
+    y: 480.7,
+  },
   SWKu_JUB: {
     name: "SWKu_JUB",
     station: { nlc: 784 },
@@ -566,6 +574,18 @@ export const STATION_NODES: Record<string, StationNode> = {
     station: { nlc: 761 },
     x: 482,
     y: 472.5,
+  },
+  GPKu_JUB: {
+    name: "GPKu_JUB",
+    station: { nlc: 590 },
+    x: 441.5,
+    y: 432.2,
+  },
+  BDSu_JUB: {
+    name: "BDSu_JUB",
+    station: { nlc: 524 },
+    x: 429.3,
+    y: 393.7,
   },
 
   // Metropolitan
@@ -680,6 +700,7 @@ export const STATION_NODE_ALIASES: Record<string, string> = {
   LSTu_CEN: "LSTu_MET",
   NHGu_CEN: "NHGu_DIS",
   OXCu_BAK: "OXCu_CEN",
+  BSTu_JUB: "BSTu_BAK",
 };
 
 export function resolveStationNodeReference(
@@ -776,8 +797,11 @@ export const LINK_NODES: Record<string, LinkNode> = {
   "TEM-BLF": { x: 551.5, y: 479.6 },
 
   // Jubilee
+  "LON-SWK-0": { x: 593.5, y: 481 },
+  "LON-SWK-1": { x: 551, y: 523.9 },
   "SWKu_JUB-WLOu_JUB-0": { x: 495.3, y: 523.9 },
   "WLOu_JUB-WMSu_JUB-0": { x: 495.4, y: 486 },
+  "GPK-BDS": { x: 429.3, y: 419.5 },
 
   // Northern
   "OVLu_NOR-KENu_NOR-0": { x: 492.8, y: 599.9 },
@@ -872,6 +896,12 @@ export const LINKS: Link[] = [
   // Jubilee
   {
     lines: [{ lineName: "Jubilee" }],
+    from: { nodeName: "LONu_JUB" },
+    to: { nodeName: "SWKu_JUB" },
+    path: [{ linkNodeName: "LON-SWK-0" }, { linkNodeName: "LON-SWK-1" }],
+  },
+  {
+    lines: [{ lineName: "Jubilee" }],
     from: { nodeName: "SWKu_JUB" },
     to: { nodeName: "WLOu_JUB" },
     path: [{ linkNodeName: "SWKu_JUB-WLOu_JUB-0" }],
@@ -881,6 +911,22 @@ export const LINKS: Link[] = [
     from: { nodeName: "WLOu_JUB" },
     to: { nodeName: "WMSu_JUB" },
     path: [{ linkNodeName: "WLOu_JUB-WMSu_JUB-0" }],
+  },
+  {
+    lines: [{ lineName: "Jubilee" }],
+    from: { nodeName: "WMSu_JUB" },
+    to: { nodeName: "GPKu_JUB" },
+  },
+  {
+    lines: [{ lineName: "Jubilee" }],
+    from: { nodeName: "GPKu_JUB" },
+    to: { nodeName: "BDSu_JUB" },
+    path: [{ linkNodeName: "GPK-BDS" }],
+  },
+  {
+    lines: [{ lineName: "Jubilee" }],
+    from: { nodeName: "BDSu_JUB" },
+    to: { nodeName: "BSTu_JUB" },
   },
 
   // Northern
