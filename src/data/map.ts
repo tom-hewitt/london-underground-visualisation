@@ -113,6 +113,9 @@ export const STATIONS: Station[] = [
   { name: "Angel", nlc: 507, asc: "ANGu" },
 
   { name: "Bank and Monument", nlc: 513, asc: "BNKu", interchange: true },
+
+  { name: "Vauxhall", nlc: 777, asc: "VUXu", interchange: true },
+  { name: "Pimlico", nlc: 776, asc: "PIMu" },
 ];
 
 export const STATION_LABELS: StationLabel[] = [
@@ -757,6 +760,32 @@ export const STATION_NODES: Record<string, StationNode> = {
     y: 339.2,
   },
 
+  // Victoria
+  VUXu_VIC: {
+    name: "VUXu_VIC",
+    station: { nlc: 777 },
+    x: 447.1,
+    y: 579.1,
+  },
+  PIMu_VIC: {
+    name: "PIMu_VIC",
+    station: { nlc: 776 },
+    x: 441.5,
+    y: 520.8,
+  },
+  VICu_VIC: {
+    name: "VICu_VIC",
+    station: { nlc: 741 },
+    x: 441.6,
+    y: 473.3,
+  },
+  EUSu_VIC: {
+    name: "EUSu_VIC",
+    station: { nlc: 574 },
+    x: 526.7,
+    y: 338.6,
+  },
+
   // Waterloo & City
   BNKu_WAC: {
     name: "BNKu_WAC",
@@ -778,6 +807,10 @@ export const STATION_NODE_ALIASES: Record<string, string> = {
   BSTu_JUB: "BSTu_BAK",
   CHXu_NOR: "CHXu_BAK",
   LONu_NOR: "LONu_JUB",
+  GPKu_VIC: "GPKu_JUB",
+  OXCu_VIC: "OXCu_CEN",
+  WSTu_VIC: "WSTu_NOR",
+  KXXu_VIC: "KXXu_NOR",
 };
 
 export function resolveStationNodeReference(
@@ -842,6 +875,12 @@ export const LINES: Record<string, Line> = {
     directions: ["NB", "SB"],
     colour: "#82898F",
   },
+  Victoria: {
+    name: "Victoria",
+    abbreviation: "VIC",
+    directions: ["NB", "SB"],
+    colour: "#009CDB",
+  },
   "Waterloo & City": {
     name: "Waterloo & City",
     abbreviation: "WAC",
@@ -900,6 +939,11 @@ export const LINK_NODES: Record<string, LinkNode> = {
   "AL-LSTu": { x: 657.7, y: 390.3 },
 
   "MGT-LST": { x: 595.5, y: 390.3 }, // TODO: this doesn't work if LST-MGT - some weird alphabetic stuff going on
+
+  // Victoria
+  "VUX-PIM": { x: 441.5, y: 573.5 },
+  "GPK-OXC": { x: 441.6, y: 420 },
+  "WST-EUS": { x: 523.5, y: 338.6 },
 
   // Waterloo & City
   "WLO-BNK-0": { x: 550.5, y: 511.6 },
@@ -1012,6 +1056,46 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Jubilee" }],
     from: { nodeName: "BDSu_JUB" },
     to: { nodeName: "BSTu_JUB" },
+  },
+
+  // Victoria
+  {
+    lines: [{ lineName: "Victoria" }],
+    from: { nodeName: "VUXu_VIC" },
+    to: { nodeName: "PIMu_VIC" },
+    path: [{ linkNodeName: "VUX-PIM" }],
+  },
+  {
+    lines: [{ lineName: "Victoria" }],
+    from: { nodeName: "PIMu_VIC" },
+    to: { nodeName: "VICu_VIC" },
+  },
+  {
+    lines: [{ lineName: "Victoria" }],
+    from: { nodeName: "VICu_VIC" },
+    to: { nodeName: "GPKu_VIC" },
+  },
+  {
+    lines: [{ lineName: "Victoria" }],
+    from: { nodeName: "GPKu_VIC" },
+    to: { nodeName: "OXCu_VIC" },
+    path: [{ linkNodeName: "GPK-OXC" }],
+  },
+  {
+    lines: [{ lineName: "Victoria" }],
+    from: { nodeName: "OXCu_VIC" },
+    to: { nodeName: "WSTu_VIC" },
+  },
+  {
+    lines: [{ lineName: "Victoria" }],
+    from: { nodeName: "WSTu_VIC" },
+    to: { nodeName: "EUSu_VIC" },
+    path: [{ linkNodeName: "WST-EUS" }],
+  },
+  {
+    lines: [{ lineName: "Victoria" }],
+    from: { nodeName: "EUSu_VIC" },
+    to: { nodeName: "KXXu_VIC" },
   },
 
   // Northern
