@@ -15,102 +15,21 @@ import { useMemo } from "react";
 function StationNodeView({
   node,
   width = 4.6,
-  height = 4.6,
   outlineWidth = 0.6,
 }: {
   node: StationNode;
   width?: number;
-  height?: number;
   outlineWidth?: number;
 }) {
-  const direction = useMemo(() => {
-    // Get all links going to this station node
-    const linksTo = LINKS.filter(
-      (link) => resolveStationNodeReference(link.to).name === node.name
-    );
-
-    // Get the previous node for each link to this station node
-    const previousNodes = linksTo.map((link) => {
-      const lastPathNode = link.path?.[link.path.length - 1];
-      if (lastPathNode) {
-        return lastPathNode;
-      }
-      return getStationNode(link.from);
-    });
-
-    // Get all links going from this station node
-    const linksFrom = LINKS.filter(
-      (link) => resolveStationNodeReference(link.from).name === node.name
-    );
-
-    // Get the next nodes for each link from this station node
-    const nextNodes = linksFrom.map((link) => {
-      const firstPathNode = link.path?.[0];
-      if (firstPathNode) {
-        return firstPathNode;
-      }
-      return getStationNode(link.to);
-    });
-
-    // Work out the directions of all links
-    const [directionsTo, directionsFrom] = [previousNodes, nextNodes].map(
-      (nodes) =>
-        nodes.map((prevNode) => {
-          const dx = node.x - prevNode.x;
-          const dy = node.y - prevNode.y;
-          const length = Math.sqrt(dx * dx + dy * dy);
-          return { x: dx / length, y: dy / length };
-        })
-    );
-
-    // Find the average direction by summing and normalising
-    const directionSum = [
-      ...directionsTo,
-      ...directionsFrom.map(({ x, y }) => ({ x: -x, y: -y })),
-    ].reduce((acc, dir) => ({ x: acc.x + dir.x, y: acc.y + dir.y }), {
-      x: 0,
-      y: 0,
-    });
-    const length = Math.sqrt(
-      directionSum.x * directionSum.x + directionSum.y * directionSum.y
-    );
-    if (length === 0) {
-      console.log({ node, previousNodes, directionsTo, directionsFrom });
-      return { x: 0, y: 0 };
-    }
-
-    return {
-      x: directionSum.x / length,
-      y: directionSum.y / length,
-    };
-  }, [node]);
-
-  const x1 = node.x - (width / 2) * direction.y;
-  const y1 = node.y - (width / 2) * -direction.x;
-  const x2 = node.x + (width / 2) * direction.y;
-  const y2 = node.y + (width / 2) * -direction.x;
-
   return node.interchange ? (
-    <>
-      <line
-        x1={x1}
-        y1={y1}
-        x2={x2}
-        y2={y2}
-        stroke="black"
-        strokeWidth={height + outlineWidth * 2}
-        strokeLinecap="round"
-      />
-      <line
-        x1={x1}
-        y1={y1}
-        x2={x2}
-        y2={y2}
-        stroke="white"
-        strokeWidth={height}
-        strokeLinecap="round"
-      />
-    </>
+    <circle
+      cx={node.x}
+      cy={node.y}
+      r={width / 2}
+      fill="#FFFFFF"
+      stroke="#000000"
+      strokeWidth={outlineWidth}
+    />
   ) : null;
 }
 
