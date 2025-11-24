@@ -574,28 +574,31 @@ export const LINK_NODES: Record<string, LinkNode> = {
   "ALEu-LSTu_MET": { x: 671, y: 403 },
   "AL-LSTu": { x: 657.7, y: 390.3 },
 
-  "LST-MGT": { x: 595.5, y: 390.3 },
+  "MGT-LST": { x: 595.5, y: 390.3 }, // TODO: this doesn't work if LST-MGT - some weird alphabetic stuff going on
 };
 
 export const LINK_SECTIONS: Record<string, LinkSection> = {
   "ALEu_DIS-ALEu-LSTu_MET": {
-    lines: [{ lineName: "District" }, { lineName: "H&C" }],
+    lines: [{ lineName: "H&C" }, { lineName: "District" }],
   },
   "AL-LSTu-LSTu_MET": {
     lines: [
-      { lineName: "Metropolitan" },
-      { lineName: "Circle" },
       { lineName: "H&C" },
+      { lineName: "Circle" },
+      { lineName: "Metropolitan" },
     ],
   },
   "AL-LSTu-ALDu_MET": {
-    lines: [{ lineName: "Circle" }, { lineName: "Metropolitan" }],
+    lines: [{ lineName: "Metropolitan" }, { lineName: "Circle" }],
   },
   "THL-AL-0-THLu_DIS": {
+    lines: [{ lineName: "Circle" }, { lineName: "District" }],
+  },
+  "THL-AL-0-THL-AL-1": {
     lines: [{ lineName: "District" }, { lineName: "Circle" }],
   },
   "BNKu_WAC-STP-BNK": {
-    lines: [{ lineName: "Waterloo & City" }, { lineName: "Central" }],
+    lines: [{ lineName: "Central" }, { lineName: "Waterloo & City" }],
   },
 };
 
@@ -696,39 +699,39 @@ export const LINKS: Link[] = [
 
   // Circle
   {
-    lines: [{ lineName: "District" }, { lineName: "Circle" }],
+    lines: [{ lineName: "Circle" }, { lineName: "District" }],
     from: { nodeName: "WMSu_DIS", directions: ["EB", "WB"] },
     to: { nodeName: "EMBu_DIS", directions: ["EB", "WB"] },
   },
   {
-    lines: [{ lineName: "Circle" }, { lineName: "District" }],
+    lines: [{ lineName: "District" }, { lineName: "Circle" }],
     from: { nodeName: "EMBu_DIS", directions: ["EB", "WB"] },
     to: { nodeName: "TEMu_DIS", directions: ["EB", "WB"] },
   },
   {
-    lines: [{ lineName: "District" }, { lineName: "Circle" }],
+    lines: [{ lineName: "Circle" }, { lineName: "District" }],
     from: { nodeName: "TEMu_DIS", directions: ["EB", "WB"] },
     to: { nodeName: "BLFu_DIS", directions: ["EB", "WB"] },
     path: [{ linkNodeName: "TEM-BLF" }],
   },
   {
-    lines: [{ lineName: "Circle" }, { lineName: "District" }],
+    lines: [{ lineName: "District" }, { lineName: "Circle" }],
     from: { nodeName: "BLFu_DIS", directions: ["EB", "WB"] },
     to: { nodeName: "MANu_DIS", directions: ["EB", "WB"] },
   },
   {
-    lines: [{ lineName: "District" }, { lineName: "Circle" }],
+    lines: [{ lineName: "Circle" }, { lineName: "District" }],
     from: { nodeName: "MANu_DIS", directions: ["EB", "WB"] },
     to: { nodeName: "CSTu_DIS", directions: ["EB", "WB"] },
   },
   {
-    lines: [{ lineName: "District" }, { lineName: "Circle" }],
+    lines: [{ lineName: "Circle" }, { lineName: "District" }],
     from: { nodeName: "CSTu_DIS", directions: ["EB", "WB"] },
     to: { nodeName: "BNKu_DIS", directions: ["EB", "WB"] },
     path: [{ linkNodeName: "CST-BNK" }],
   },
   {
-    lines: [{ lineName: "Circle" }, { lineName: "District" }],
+    lines: [{ lineName: "District" }, { lineName: "Circle" }],
     from: { nodeName: "BNKu_DIS", directions: ["EB", "WB"] },
     to: { nodeName: "THLu_DIS", directions: ["EB", "WB"] },
   },
@@ -753,7 +756,7 @@ export const LINKS: Link[] = [
     ],
     from: { nodeName: "LSTu_MET", directions: ["NB", "SB"] },
     to: { nodeName: "MGTu_MET", directions: ["NB", "SB"] },
-    path: [{ linkNodeName: "LST-MGT" }],
+    path: [{ linkNodeName: "MGT-LST" }],
   },
 
   {

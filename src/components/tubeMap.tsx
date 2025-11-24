@@ -55,8 +55,7 @@ export function TubeMapVisualisation({
             ) {
               totalLoad = totalLoad / 2;
             }
-            // return [line.lineName, totalLoad];
-            return [line.lineName, 10];
+            return [line.lineName, totalLoad];
           })
         ),
       ]),
@@ -134,6 +133,32 @@ export function TubeMapVisualisation({
     return sectionLoads;
   }, [totalLinkLoads, widthScale]);
 
+  // Calculate the order of the lines for each link section
+  const linkSectionOrders = useMemo(() => {
+    const sections = structuredClone(LINK_SECTIONS);
+
+    for (const [linkName, link] of Object.entries(LINKS)) {
+      let previousNode = resolveStationNodeReference(link.from).nodeName;
+
+      for (const nodeName of [
+        ...(link.path ?? []).map((n) => n.linkNodeName),
+        resolveStationNodeReference(link.to).nodeName,
+      ]) {
+        const sectionKey = [previousNode, nodeName]
+          .sort((a, b) => a.localeCompare(b))
+          .join("-");
+
+        if (!(sectionKey in sections)) {
+          sections[sectionKey] = { lines: link.lines }; // Fallback to link lines if not defined in LINK_SECTIONS
+        }
+
+        previousNode = nodeName;
+      }
+    }
+
+    return sections;
+  }, []);
+
   // Calculate the offset for each line at each link node
   const linkSectionOffsets = useMemo(() => {
     const offsets: Record<string, Record<string, number>> = {};
@@ -145,11 +170,9 @@ export function TubeMapVisualisation({
         offsets[linkSectionName] = {};
       }
 
-      const lines =
-        LINK_SECTIONS[linkSectionName]?.lines.map(({ lineName }) => lineName) ??
-        Object.keys(lineLoads);
+      const lines = linkSectionOrders[linkSectionName].lines;
 
-      const loads = lines.map((lineName) => lineLoads[lineName]);
+      const loads = lines.map(({ lineName }) => lineLoads[lineName]);
       const cumulativeLoads = [...cumsum(loads)];
       const totalLoad = cumulativeLoads[cumulativeLoads.length - 1];
       const lineOffsets = zip(loads, cumulativeLoads).map(
@@ -157,13 +180,13 @@ export function TubeMapVisualisation({
           widthScale(cumLoad) - widthScale(load) / 2 - widthScale(totalLoad) / 2
       );
 
-      for (const [lineName, lineOffset] of zip(lines, lineOffsets)) {
+      for (const [{ lineName }, lineOffset] of zip(lines, lineOffsets)) {
         offsets[linkSectionName][lineName] = lineOffset;
       }
     }
 
     return offsets;
-  }, [linkSectionLoads, widthScale]);
+  }, [linkSectionLoads, linkSectionOrders, widthScale]);
 
   const [hoveredItem, setHoveredItem] = useState<HoveredItem | null>(null);
 
@@ -308,7 +331,6 @@ type HoveredItem =
   | { type: "link"; link: LinkReference }
   | { type: "station"; station: StationReference; element: "node" | "label" };
 
-// Helper to calculate normal vector (perpendicular)
 const getNormal = (
   p1: { x: number; y: number },
   p2: { x: number; y: number }
@@ -336,13 +358,20 @@ function getOffset(
     return offset;
   } else {
     const sectionKey = [b.name, a.name].join("-");
-    const offset = -(linkSectionOffsets[sectionKey]?.[line.lineName] ?? 0);
-    return offset;
+    const offset = linkSectionOffsets[sectionKey]?.[line.lineName] ?? 0;
+    return -offset;
   }
 }
 
 function dot(a: { x: number; y: number }, b: { x: number; y: number }): number {
   return a.x * b.x + a.y * b.y;
+}
+
+function cross(
+  a: { x: number; y: number },
+  b: { x: number; y: number }
+): number {
+  return a.x * b.y - a.y * b.x;
 }
 
 function add(
@@ -455,25 +484,28 @@ function LinkView({
       const dirToNext = normalise(subtract(nextNode, corner));
 
       // Vector from corner to previous node (B -> A)
-      // Note: previousDirection in the loop state was calculated as normalise(subtract(previousNode, nextNode))
       // which is effectively A -> B (incoming direction).
       // To match the formula B -> A, we need to negate it or calculate B -> A.
       const dirToPrev = normalise(subtract(previousNode, corner));
 
-      // Angle between B->A and B->C
-      const angle = Math.acos(dot(dirToPrev, dirToNext));
+      // The cross product gives us the sine of the angle with sign indicating direction
+      const crossProd = cross(dirToPrev, dirToNext);
 
-      // The sine of the angle
-      const sinAngle = Math.sin(angle);
+      // Avoid division by zero for straight lines
+      const denominator =
+        Math.abs(crossProd) < 1e-4
+          ? crossProd >= 0
+            ? 1e-4
+            : -1e-4
+          : crossProd;
 
       // Calculate vectors u and v
-      // u is along B->A (dirToPrev), scaled by nextOffset / sin(angle)
-      // v is along B->C (dirToNext), scaled by previousOffset / sin(angle)
-      // Note: The formula provided in the prompt says u corresponds to b/2 (nextOffset) and v to a/2 (previousOffset).
-      // But geometrically, the component along one leg depends on the width of the *other* leg.
+      // u is along B->A (dirToPrev), scaled by nextOffset / -denominator
+      // v is along B->C (dirToNext), scaled by previousOffset / -denominator
+      // We use -denominator because of the coordinate system / derivation.
 
-      const uVec = multiply(dirToPrev, nextOffset / sinAngle);
-      const vVec = multiply(dirToNext, previousOffset / sinAngle);
+      const uVec = multiply(dirToPrev, nextOffset / denominator);
+      const vVec = multiply(dirToNext, previousOffset / denominator);
 
       // D = B + u + v
       const offset = add(uVec, vVec);
@@ -513,20 +545,20 @@ function LinkView({
       <path
         d={linkPath}
         stroke={colour}
-        // strokeWidth={width}
-        strokeWidth={1}
+        strokeWidth={width}
+        // strokeWidth={1}
         strokeLinejoin="round"
         fill="none"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       />
-      <path
+      {/* <path
         d={debugPath}
         stroke="#FF00FF"
         strokeWidth={0.2}
         strokeLinejoin="round"
         fill="none"
-      />
+      /> */}
     </>
   );
 }
