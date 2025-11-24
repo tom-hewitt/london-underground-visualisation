@@ -43,7 +43,8 @@ export function TubeMapVisualisation({
                 if (name in data) {
                   return data[name];
                 } else {
-                  throw new Error(`Missing load data for link: ${name}`);
+                  console.warn(`Missing load data for link: ${name}`);
+                  return { total: 0 };
                 }
               }
             );
