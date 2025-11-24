@@ -65,6 +65,7 @@ export const STATIONS: Station[] = [
   { name: "Bayswater", nlc: 517, asc: "BAYu" },
   { name: "Notting Hill Gate", nlc: 663, asc: "NHGu", interchange: true },
   { name: "Holland Park", nlc: 605, asc: "HST" },
+  { name: "Earl's Court", nlc: 562, asc: "ECTu", interchange: true },
   { name: "Gloucester Road", nlc: 583, asc: "GRDu" },
   { name: "South Kensington", nlc: 708, asc: "SKNu", interchange: true },
   { name: "Sloane Square", nlc: 702, asc: "SSQu" },
@@ -525,7 +526,13 @@ export const STATION_NODES: Record<string, StationNode> = {
   GRDu_DIS: {
     name: "GRDu_DIS",
     station: { nlc: 583 },
-    x: 373.15,
+    x: 372.4,
+    y: 479.6,
+  },
+  ECTu_DIS: {
+    name: "ECTu_DIS",
+    station: { nlc: 562 },
+    x: 348.4,
     y: 479.6,
   },
   SKNu_DIS: {
@@ -766,6 +773,12 @@ export const STATION_NODES: Record<string, StationNode> = {
   },
 
   // Picadilly
+  ECTu_PIC: {
+    name: "ECTu_PIC",
+    station: { nlc: 562 },
+    x: 348.4,
+    y: 473.8,
+  },
   GRDu_PIC: {
     name: "GRDu_PIC",
     station: { nlc: 583 },
@@ -1033,6 +1046,12 @@ export const LINK_SECTIONS: Record<string, LinkSection> = {
   "BNKu_WAC-STP-BNK": {
     lines: [{ lineName: "Central" }, { lineName: "Waterloo & City" }],
   },
+  "HST-GRD-HSTu_DIS": {
+    lines: [{ lineName: "Circle" }, { lineName: "District" }],
+  },
+  "GRDu_DIS-HST-GRD": {
+    lines: [{ lineName: "Circle" }, { lineName: "District" }],
+  },
 };
 
 export const LINKS: Link[] = [
@@ -1119,6 +1138,11 @@ export const LINKS: Link[] = [
   },
 
   // Picadilly
+  {
+    lines: [{ lineName: "Picadilly" }],
+    from: { nodeName: "ECTu_PIC" },
+    to: { nodeName: "GRDu_PIC" },
+  },
   {
     lines: [{ lineName: "Picadilly" }],
     from: { nodeName: "GRDu_PIC" },
@@ -1566,6 +1590,18 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Circle" }, { lineName: "District" }],
     from: { nodeName: "NHGu_DIS", directions: ["WB", "EB"] },
     to: { nodeName: "HSTu_DIS", directions: ["WB", "EB"] },
+  },
+  {
+    lines: [{ lineName: "District" }],
+    from: { nodeName: "ECTu_DIS" },
+    to: { nodeName: "HSTu_DIS" },
+    path: [{ linkNodeName: "HST-GRD" }],
+  },
+  {
+    lines: [{ lineName: "District" }],
+    from: { nodeName: "ECTu_DIS" },
+    to: { nodeName: "GRDu_DIS" },
+    path: [{ linkNodeName: "HST-GRD" }],
   },
   {
     lines: [{ lineName: "District" }, { lineName: "Circle" }],
