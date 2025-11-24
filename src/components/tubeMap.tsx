@@ -21,7 +21,8 @@ import {
   StationNode,
   StationReference,
 } from "@/data/types";
-import { max, path, scaleLinear, sum } from "d3";
+import { cumsum, max, path, scaleLinear, sum } from "d3";
+import { zip } from "radash";
 import { useMemo, useState } from "react";
 
 export function TubeMapVisualisation({
@@ -59,6 +60,28 @@ export function TubeMapVisualisation({
       [totalLinkLoads]
     );
 
+  const adjacentLinks: Record<
+    string,
+    Record<string, [Link, number][]>
+  > = useMemo(() => {
+    const adjacentLinks: Record<string, Record<string, [Link, number][]>> = {};
+
+    for (const [link, totalLoad] of totalLinkLoads) {
+      const from = resolveStationNodeReference(link.from);
+      const to = resolveStationNodeReference(link.to);
+
+      if (!adjacentLinks[from.nodeName]) {
+        adjacentLinks[from.nodeName] = {};
+      }
+      if (!adjacentLinks[from.nodeName][to.nodeName]) {
+        adjacentLinks[from.nodeName][to.nodeName] = [];
+      }
+      adjacentLinks[from.nodeName][to.nodeName].push([link, totalLoad]);
+    }
+
+    return adjacentLinks;
+  }, [totalLinkLoads]);
+
   const widthScale = useMemo(() => {
     const maxNodeTotal =
       max(
@@ -73,33 +96,50 @@ export function TubeMapVisualisation({
 
   return (
     <svg viewBox="0 0 945 670" width={945} height={670}>
-      {totalLinkLoads.map(([link, totalLoad]) => {
-        const hovered =
-          hoveredItem?.type === "link" &&
-          hoveredItem.link.from.nodeName === link.from.nodeName &&
-          hoveredItem.link.to.nodeName === link.to.nodeName;
-        const setHovered = (hovered: boolean) => {
-          if (hovered) {
-            setHoveredItem({ type: "link", link });
-          } else if (
-            hoveredItem?.type === "link" &&
-            hoveredItem.link.from.nodeName === link.from.nodeName &&
-            hoveredItem.link.to.nodeName === link.to.nodeName
-          ) {
-            setHoveredItem(null);
-          }
-        };
+      {Object.entries(adjacentLinks).map(([, toNodes]) =>
+        Object.entries(toNodes).map(([, links]) => {
+          const widths = links.map(([, load]) => widthScale(load));
+          const totalWidth = sum(widths);
+          let currentPos = -totalWidth / 2;
 
-        return (
-          <LinkView
-            key={`${link.from.nodeName}-${link.to.nodeName}`}
-            link={link}
-            width={widthScale(totalLoad)}
-            hovered={hovered}
-            setHovered={setHovered}
-          />
-        );
-      })}
+          const offsets = widths.map((width) => {
+            const offset = currentPos + width / 2;
+            currentPos += width;
+            return offset;
+          });
+
+          return zip(links, offsets).map(([[link, totalLoad], offset]) => {
+            const hovered =
+              hoveredItem?.type === "link" &&
+              hoveredItem.link.from.nodeName === link.from.nodeName &&
+              hoveredItem.link.to.nodeName === link.to.nodeName &&
+              hoveredItem.link.line.lineName === link.line.lineName;
+            const setHovered = (hovered: boolean) => {
+              if (hovered) {
+                setHoveredItem({ type: "link", link });
+              } else if (
+                hoveredItem?.type === "link" &&
+                hoveredItem.link.from.nodeName === link.from.nodeName &&
+                hoveredItem.link.to.nodeName === link.to.nodeName &&
+                hoveredItem.link.line.lineName === link.line.lineName
+              ) {
+                setHoveredItem(null);
+              }
+            };
+
+            return (
+              <LinkView
+                key={`${link.from.nodeName}-${link.to.nodeName}-${link.line.lineName}`}
+                link={link}
+                width={widthScale(totalLoad)}
+                offset={offset}
+                hovered={hovered}
+                setHovered={setHovered}
+              />
+            );
+          });
+        })
+      )}
       {STATIONS.map((station) => {
         const nodes = Object.values(stationNodeLinks).filter(
           ([node]) => node.station.nlc === station.nlc
@@ -191,15 +231,29 @@ type HoveredItem =
   | { type: "link"; link: LinkReference }
   | { type: "station"; station: StationReference; element: "node" | "label" };
 
+// Helper to calculate normal vector (perpendicular)
+const getNormal = (
+  p1: { x: number; y: number },
+  p2: { x: number; y: number }
+) => {
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  if (len === 0) return { x: 0, y: 0 };
+  return { x: -dy / len, y: dx / len };
+};
+
 function LinkView({
   link,
   width = 2,
+  offset = 0,
   outlineWidth = 0.6,
   hovered,
   setHovered,
 }: {
   link: Link;
   width?: number;
+  offset?: number;
   outlineWidth?: number;
   hovered?: boolean;
   setHovered: (hovered: boolean) => void;
@@ -211,22 +265,78 @@ function LinkView({
     const toNode = getStationNode(link.to);
     const pathNodes = link.path ?? [];
 
-    linkPath.moveTo(fromNode.x, fromNode.y);
+    // Helper to shift a point by a normal vector
+    const shift = (
+      p: { x: number; y: number },
+      normal: { x: number; y: number }
+    ) => ({
+      x: p.x + normal.x * offset,
+      y: p.y + normal.y * offset,
+    });
+
+    let currentPoint = { x: fromNode.x, y: fromNode.y };
+
+    // 1. Move to Start Point
+    // Determine start direction to calculate normal
+    let startTarget =
+      pathNodes.length > 0 ? pathNodes[0].cp1 ?? pathNodes[0] : toNode;
+
+    // Handle zero-length control points if necessary
+    if (
+      startTarget.x === currentPoint.x &&
+      startTarget.y === currentPoint.y &&
+      pathNodes.length > 0
+    ) {
+      startTarget = pathNodes[0].cp2 ?? pathNodes[0];
+    }
+
+    const startNormal = getNormal(currentPoint, startTarget);
+    const startShifted = shift(currentPoint, startNormal);
+    linkPath.moveTo(startShifted.x, startShifted.y);
 
     for (const node of pathNodes) {
       if ("cp1" in node || "cp2" in node) {
         const cp1 = node.cp1 ?? { x: node.x, y: node.y };
         const cp2 = node.cp2 ?? { x: node.x, y: node.y };
-        linkPath.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, node.x, node.y);
+
+        // Calculate normals for the curve
+        const segStartNormal = getNormal(currentPoint, cp1);
+        const segEndNormal = getNormal(cp2, node);
+
+        // Fallback if start normal is zero length
+        const effectiveStartNormal =
+          segStartNormal.x === 0 && segStartNormal.y === 0
+            ? startNormal
+            : segStartNormal;
+
+        const cp1Shifted = shift(cp1, effectiveStartNormal);
+        const cp2Shifted = shift(cp2, segEndNormal);
+        const endShifted = shift(node, segEndNormal);
+
+        linkPath.bezierCurveTo(
+          cp1Shifted.x,
+          cp1Shifted.y,
+          cp2Shifted.x,
+          cp2Shifted.y,
+          endShifted.x,
+          endShifted.y
+        );
       } else {
-        linkPath.lineTo(node.x, node.y);
+        // Straight line segment
+        const normal = getNormal(currentPoint, node);
+        const endShifted = shift(node, normal);
+        linkPath.lineTo(endShifted.x, endShifted.y);
       }
+      currentPoint = node;
     }
 
-    linkPath.lineTo(toNode.x, toNode.y);
+    // 3. Final Line to Destination
+    const finalNormal = getNormal(currentPoint, toNode);
+    const finalShifted = shift(toNode, finalNormal);
+    linkPath.lineTo(finalShifted.x, finalShifted.y);
 
     return linkPath.toString();
-  }, [link]);
+  }, [link, offset]);
 
   const colour = useMemo(() => LINES[link.line.lineName].colour, [link.line]);
 

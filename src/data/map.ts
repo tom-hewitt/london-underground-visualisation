@@ -52,6 +52,13 @@ export const STATIONS: Station[] = [
   { name: "Kenton", nlc: 620, asc: "KETu" },
   { name: "Harrow & Wealdstone", nlc: 597, asc: "HAWu" },
 
+  { name: "Temple", nlc: 724, asc: "TEMu" },
+  { name: "Blackfriars LU", nlc: 521, asc: "BLFu", interchange: true },
+  { name: "Mansion House", nlc: 639, asc: "MANu" },
+  { name: "Cannon Street LU", nlc: 536, asc: "CSTu", interchange: true },
+  { name: "Tower Hill", nlc: 731, asc: "THLu", interchange: true },
+  { name: "Aldgate East", nlc: 503, asc: "ALEu" },
+
   { name: "Westminster", nlc: 761, asc: "WMSu", interchange: true },
 
   { name: "Southwark", nlc: 784, asc: "SWKu", interchange: true },
@@ -119,6 +126,17 @@ export const STATION_LABELS: StationLabel[] = [
     },
   },
   {
+    name: "Southwark",
+    station: { nlc: 784 },
+    position: {
+      node: { nodeName: "SWKu_JUB" },
+    },
+    alignment: {
+      textAnchor: "middle",
+      dominantBaseline: "text-before-edge",
+    },
+  },
+  {
     name: "Embankment",
     station: { nlc: 542 },
     position: {
@@ -176,11 +194,53 @@ export const STATION_NODES: Record<string, StationNode> = {
     x: 482,
     y: 479.2,
   },
+  TEMu_DIS: {
+    name: "TEMu_DIS",
+    station: { nlc: 724 },
+    x: 540.75,
+    y: 479.6,
+  },
+  BLFu_DIS: {
+    name: "BLFu_DIS",
+    station: { nlc: 521 },
+    x: 563.9,
+    y: 466.15,
+  },
+  MANu_DIS: {
+    name: "MANu_DIS",
+    station: { nlc: 639 },
+    x: 571.35,
+    y: 458.91,
+  },
+  CSTu_DIS: {
+    name: "CSTu_DIS",
+    station: { nlc: 536 },
+    x: 579.4,
+    y: 450.9,
+  },
+  BNKu_DIS: {
+    name: "BNKu_DIS",
+    station: { nlc: 513 },
+    x: 613,
+    y: 436.6,
+  },
+  THLu_DIS: {
+    name: "THLu_DIS",
+    station: { nlc: 731 },
+    x: 646.2,
+    y: 436.5,
+  },
+  ALEu_DIS: {
+    name: "ALEu_DIS",
+    station: { nlc: 503 },
+    x: 679.29,
+    y: 396.67,
+  },
 
   // Jubilee
   SWKu_JUB: {
     name: "SWKu_JUB",
-    station: { nlc: 704 },
+    station: { nlc: 784 },
     x: 531.5,
     y: 523.9,
   },
@@ -274,6 +334,12 @@ export const LINES: Record<string, Line> = {
     abbreviation: "NOR",
     directions: ["NB", "SB"],
     colour: "#000000",
+  },
+  "H&C and Circle": {
+    name: "H&C and Circle",
+    abbreviation: "HAM",
+    directions: ["IR", "OR"],
+    colour: "#FFD300",
   },
   Jubilee: {
     name: "Jubilee",
@@ -404,11 +470,33 @@ export const LINKS: Link[] = [
     to: { nodeName: "EMBu_NOR" },
   },
 
+  // Circle
+  {
+    line: { lineName: "H&C and Circle" },
+    from: { nodeName: "WMSu_DIS", directions: ["EB", "WB"] },
+    to: { nodeName: "EMBu_DIS", directions: ["EB", "WB"] },
+  },
+  {
+    line: { lineName: "H&C and Circle" },
+    from: { nodeName: "EMBu_DIS", directions: ["EB", "WB"] },
+    to: { nodeName: "TEMu_DIS", directions: ["EB", "WB"] },
+  },
+
   // District
   {
     line: { lineName: "District" },
     from: { nodeName: "WMSu_DIS" },
     to: { nodeName: "EMBu_DIS" },
+  },
+  {
+    line: { lineName: "District" },
+    from: { nodeName: "EMBu_DIS" },
+    to: { nodeName: "TEMu_DIS" },
+  },
+  {
+    line: { lineName: "District" },
+    from: { nodeName: "TEMu_DIS" },
+    to: { nodeName: "BLFu_DIS" },
   },
 
   // Waterloo & City
@@ -445,10 +533,11 @@ export const LINKS: Link[] = [
 export function linkNames(link: Link): string[] {
   const line = LINES[link.line.lineName];
 
-  const [forwardDirection, backwardDirection] = line.directions;
+  const fromDirections = link.from.directions ?? line.directions;
+  const toDirections = link.to.directions ?? line.directions;
 
   return [
-    `${link.from.nodeName}_${forwardDirection}>${link.to.nodeName}_${forwardDirection}@${line.abbreviation}`,
-    `${link.to.nodeName}_${backwardDirection}>${link.from.nodeName}_${backwardDirection}@${line.abbreviation}`,
+    `${link.from.nodeName}_${fromDirections[0]}>${link.to.nodeName}_${toDirections[0]}@${line.abbreviation}`,
+    `${link.to.nodeName}_${toDirections[1]}>${link.from.nodeName}_${fromDirections[1]}@${line.abbreviation}`,
   ];
 }
