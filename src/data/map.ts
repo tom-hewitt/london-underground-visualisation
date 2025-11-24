@@ -116,6 +116,11 @@ export const STATIONS: Station[] = [
 
   { name: "Vauxhall", nlc: 777, asc: "VUXu", interchange: true },
   { name: "Pimlico", nlc: 776, asc: "PIMu" },
+
+  { name: "Knightsbridge", nlc: 626, asc: "KNBu" },
+  { name: "Hyde Park Corner", nlc: 614, asc: "HPCu" },
+  { name: "Covent Garden", nlc: 553, asc: "COVu" },
+  { name: "Russell Square", nlc: 694, asc: "RSQu" },
 ];
 
 export const STATION_LABELS: StationLabel[] = [
@@ -760,6 +765,44 @@ export const STATION_NODES: Record<string, StationNode> = {
     y: 339.2,
   },
 
+  // Picadilly
+  GRDu_PIC: {
+    name: "GRDu_PIC",
+    station: { nlc: 583 },
+    x: 372.4,
+    y: 473.8,
+  },
+  SKNu_PIC: {
+    name: "SKNu_PIC",
+    station: { nlc: 708 },
+    x: 387.6,
+    y: 473.8,
+  },
+  KNBu_PIC: {
+    name: "KNBu_PIC",
+    station: { nlc: 626 },
+    x: 410.1,
+    y: 457.4,
+  },
+  HPCu_PIC: {
+    name: "HPCu_PIC",
+    station: { nlc: 614 },
+    x: 430.3,
+    y: 437.2,
+  },
+  COVu_PIC: {
+    name: "COVu_PIC",
+    station: { nlc: 553 },
+    x: 514.6,
+    y: 412.7,
+  },
+  RSQu_PIC: {
+    name: "RSQu_PIC",
+    station: { nlc: 694 },
+    x: 552.9,
+    y: 361.3,
+  },
+
   // Victoria
   VUXu_VIC: {
     name: "VUXu_VIC",
@@ -811,6 +854,11 @@ export const STATION_NODE_ALIASES: Record<string, string> = {
   OXCu_VIC: "OXCu_CEN",
   WSTu_VIC: "WSTu_NOR",
   KXXu_VIC: "KXXu_NOR",
+  GPKu_PIC: "GPKu_JUB",
+  PICu_PIC: "PICu_BAK",
+  LSQu_PIC: "LSQu_NOR",
+  HOLu_PIC: "HOLu_CEN",
+  KXXu_PIC: "KXXu_NOR",
 };
 
 export function resolveStationNodeReference(
@@ -874,6 +922,12 @@ export const LINES: Record<string, Line> = {
     abbreviation: "JUB",
     directions: ["NB", "SB"],
     colour: "#82898F",
+  },
+  Picadilly: {
+    name: "Picadilly",
+    abbreviation: "PIC",
+    directions: ["EB", "WB"],
+    colour: "#2E2B81",
   },
   Victoria: {
     name: "Victoria",
@@ -939,6 +993,12 @@ export const LINK_NODES: Record<string, LinkNode> = {
   "AL-LSTu": { x: 657.7, y: 390.3 },
 
   "MGT-LST": { x: 595.5, y: 390.3 }, // TODO: this doesn't work if LST-MGT - some weird alphabetic stuff going on
+
+  // Picadilly
+  "SKN-KNB": { x: 393.5, y: 473.8 },
+  "HPC-GPK": { x: 436, y: 432.1 },
+  "PIC-LSQ": { x: 495, y: 432.2 },
+  "HOL-RSQ": { x: 553, y: 374 },
 
   // Victoria
   "VUX-PIM": { x: 441.5, y: 573.5 },
@@ -1056,6 +1116,62 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Jubilee" }],
     from: { nodeName: "BDSu_JUB" },
     to: { nodeName: "BSTu_JUB" },
+  },
+
+  // Picadilly
+  {
+    lines: [{ lineName: "Picadilly" }],
+    from: { nodeName: "GRDu_PIC" },
+    to: { nodeName: "SKNu_PIC" },
+  },
+  {
+    lines: [{ lineName: "Picadilly" }],
+    from: { nodeName: "SKNu_PIC" },
+    to: { nodeName: "KNBu_PIC" },
+    path: [{ linkNodeName: "SKN-KNB" }],
+  },
+  {
+    lines: [{ lineName: "Picadilly" }],
+    from: { nodeName: "KNBu_PIC" },
+    to: { nodeName: "HPCu_PIC" },
+  },
+  {
+    lines: [{ lineName: "Picadilly" }],
+    from: { nodeName: "HPCu_PIC" },
+    to: { nodeName: "GPKu_PIC" },
+    path: [{ linkNodeName: "HPC-GPK" }],
+  },
+  {
+    lines: [{ lineName: "Picadilly" }],
+    from: { nodeName: "GPKu_PIC" },
+    to: { nodeName: "PICu_PIC" },
+  },
+  {
+    lines: [{ lineName: "Picadilly" }],
+    from: { nodeName: "PICu_PIC" },
+    to: { nodeName: "LSQu_PIC" },
+    path: [{ linkNodeName: "PIC-LSQ" }],
+  },
+  {
+    lines: [{ lineName: "Picadilly" }],
+    from: { nodeName: "LSQu_PIC" },
+    to: { nodeName: "COVu_PIC" },
+  },
+  {
+    lines: [{ lineName: "Picadilly" }],
+    from: { nodeName: "COVu_PIC" },
+    to: { nodeName: "HOLu_PIC" },
+  },
+  {
+    lines: [{ lineName: "Picadilly" }],
+    from: { nodeName: "HOLu_PIC" },
+    to: { nodeName: "RSQu_PIC" },
+    path: [{ linkNodeName: "HOL-RSQ" }],
+  },
+  {
+    lines: [{ lineName: "Picadilly" }],
+    from: { nodeName: "RSQu_PIC" },
+    to: { nodeName: "KXXu_PIC" },
   },
 
   // Victoria
