@@ -1,8 +1,8 @@
-import { loadLinkLoadData } from "@/data/numbat";
-import { TubeMapVisualisation } from "../components/tubeMap";
+import { fetchLinkLoadData } from "@/data/tube/numbat/fetch";
+import { TubeMapVisualisation } from "@/components/TubeMapVisualisation";
 
 export default async function Home() {
-  const data = await loadLinkLoadData();
+  const data = await fetchLinkLoadData();
 
   return <TubeMapVisualisation data={data} />;
 }

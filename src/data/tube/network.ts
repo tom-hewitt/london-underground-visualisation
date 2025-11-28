@@ -8,7 +8,7 @@ import {
   StationLabel,
   StationNode,
   StationNodeReference,
-} from "./types";
+} from "../types";
 
 export const STATIONS: Station[] = [
   {
@@ -64,7 +64,7 @@ export const STATIONS: Station[] = [
 
   { name: "Bayswater", nlc: 517, asc: "BAYu" },
   { name: "Notting Hill Gate", nlc: 663, asc: "NHGu", interchange: true },
-  { name: "Holland Park", nlc: 605, asc: "HST" },
+  { name: "High Street Kensington", nlc: 605, asc: "HSTu" },
   { name: "Earl's Court", nlc: 562, asc: "ECTu", interchange: true },
   { name: "Gloucester Road", nlc: 583, asc: "GRDu" },
   { name: "South Kensington", nlc: 708, asc: "SKNu", interchange: true },
@@ -1448,18 +1448,6 @@ export const STATION_NODE_ALIASES: Record<string, string> = {
   TCRu_EZL: "TCRu_NOR",
 };
 
-export function resolveStationNodeReference(
-  reference: StationNodeReference
-): StationNodeReference {
-  return {
-    nodeName: STATION_NODE_ALIASES[reference.nodeName] ?? reference.nodeName,
-  };
-}
-
-export function getStationNode(reference: StationNodeReference): StationNode {
-  return STATION_NODES[resolveStationNodeReference(reference).nodeName];
-}
-
 export const LINES: Record<string, Line> = {
   Bakerloo: {
     name: "Bakerloo",
@@ -2268,18 +2256,3 @@ export const LINKS: Link[] = [
     ],
   },
 ];
-
-export function linkNames(
-  line: LineReference,
-  from: StationNodeReference & { directions?: [string, string] },
-  to: StationNodeReference & { directions?: [string, string] }
-): string[] {
-  const { directions, abbreviation } = LINES[line.lineName];
-
-  const fromDirections = from.directions ?? directions;
-  const toDirections = to.directions ?? directions;
-  return [
-    `${from.nodeName}_${fromDirections[0]}>${to.nodeName}_${toDirections[0]}@${abbreviation}`,
-    `${to.nodeName}_${toDirections[1]}>${from.nodeName}_${fromDirections[1]}@${abbreviation}`,
-  ];
-}

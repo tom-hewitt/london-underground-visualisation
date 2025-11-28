@@ -1,8 +1,9 @@
 import { read, utils } from "xlsx";
 import { type } from "arktype";
 import { LinkLoad, QUARTER_HOURS, TimeInterval } from "./types";
+import { readFile } from "fs/promises";
 
-export async function loadLinkLoadData(): Promise<Record<string, LinkLoad>> {
+export async function fetchLinkLoadData(): Promise<Record<string, LinkLoad>> {
   const response = await fetch(
     "https://crowding.data.tfl.gov.uk/NUMBAT/NUMBAT%202024/NBT24FRI_outputs.xlsx"
   );
