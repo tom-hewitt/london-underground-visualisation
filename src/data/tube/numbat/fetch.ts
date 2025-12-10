@@ -4,13 +4,11 @@ import { LinkLoad, QUARTER_HOURS, TimeInterval } from "./types";
 import { readFile } from "fs/promises";
 
 export async function fetchLinkLoadData(): Promise<Record<string, LinkLoad>> {
-  const response = await fetch(
-    "https://crowding.data.tfl.gov.uk/NUMBAT/NUMBAT%202024/NBT24FRI_outputs.xlsx"
+  const data = await fetchNumbatFileBuffer(
+    "NUMBAT/NUMBAT%202024/NBT24FRI_outputs.xlsx"
   );
 
-  const arrayBuffer = await response.arrayBuffer();
-
-  const workbook = read(arrayBuffer, { type: "array" });
+  const workbook = read(data, { type: "array" });
 
   const linkLoadsSheet = workbook.Sheets["Link_Loads"];
 
@@ -33,6 +31,19 @@ export async function fetchLinkLoadData(): Promise<Record<string, LinkLoad>> {
   return links;
 
   // return json.map(LinkLoadSheetSchema.assert).map(parseLinkLoad);
+}
+
+type NumbatFileBuffer = Buffer | ArrayBuffer;
+
+async function fetchNumbatFileBuffer(name: string): Promise<NumbatFileBuffer> {
+  // Allow using a local file for development
+  if (process.env.DATA_SOURCE === "fs") {
+    return await readFile(name);
+  }
+
+  const response = await fetch(`https://crowding.data.tfl.gov.uk/${name}`);
+
+  return await response.arrayBuffer();
 }
 
 const LinkLoadSheetSchema = type({
