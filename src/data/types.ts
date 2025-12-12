@@ -90,12 +90,12 @@ export interface LinkNodeReference {
 }
 
 export interface LinkSection {
-  from: StationNodeReference | LinkNodeReference;
-  to: StationNodeReference | LinkNodeReference;
   lines: LineReference[];
 }
 
 export interface WeightedLinkSection extends LinkSection {
+  from: StationNodeReference | LinkNodeReference;
+  to: StationNodeReference | LinkNodeReference;
   lines: WeightedLineReference[];
 }
 
