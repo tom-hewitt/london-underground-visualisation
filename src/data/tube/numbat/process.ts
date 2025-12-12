@@ -1,11 +1,10 @@
 import {
   LineReference,
-  Link,
   StationNodeReference,
   WeightedLink,
 } from "@/data/types";
 import { LINES, LINKS, STATION_NODE_ALIASES } from "../network";
-import { LinkLoad } from "./types";
+import { LinkLoad, TimeInterval } from "./types";
 import { sum } from "d3";
 
 /**
@@ -13,8 +12,9 @@ import { sum } from "d3";
  * @param data A mapping of link names to their load data.
  * @returns An array of weighted links.
  */
-export function weightLinksWithTotalLoad(
-  data: Record<string, LinkLoad>
+export function weightLinksWithLoad(
+  data: Record<string, LinkLoad>,
+  view: LoadView
 ): WeightedLink[] {
   return LINKS.map((link) => ({
     ...link,
@@ -23,14 +23,17 @@ export function weightLinksWithTotalLoad(
     lines: link.lines.map((line) => {
       const linkLoads = linkNames(line, link.from, link.to).map((name) => {
         if (name in data) {
-          return data[name];
+          if (view.type == "total") {
+            return data[name].total;
+          }
+          return data[name].quarterHours[view.interval];
         } else {
           console.warn(`Missing load data for link: ${name}`);
-          return { total: 0 };
+          return 0;
         }
       });
 
-      const totalLoad = sum(linkLoads, (d) => d.total);
+      const totalLoad = sum(linkLoads);
 
       // Hack to split H&C and Circle load
       if (
@@ -44,6 +47,10 @@ export function weightLinksWithTotalLoad(
     }),
   }));
 }
+
+export type LoadView =
+  | { type: "total" }
+  | { type: "interval"; interval: TimeInterval };
 
 export function resolveStationNodeReference(
   reference: StationNodeReference

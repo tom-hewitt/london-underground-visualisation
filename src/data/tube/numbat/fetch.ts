@@ -1,6 +1,11 @@
 import { read, utils } from "xlsx";
 import { type } from "arktype";
-import { LinkLoad, QUARTER_HOURS, TimeInterval } from "./types";
+import {
+  formatTimeInterval,
+  LinkLoad,
+  QUARTER_HOURS,
+  TimeInterval,
+} from "./types";
 import { readFile } from "fs/promises";
 
 export async function fetchLinkLoadData(): Promise<Record<string, LinkLoad>> {
@@ -87,7 +92,9 @@ function parseLinkLoad(row: LinkLoadSheetSchema): LinkLoad {
     evening: row["Evening"],
     late: row["Late"],
     quarterHours: Object.fromEntries(
-      QUARTER_HOURS.map((interval) => [interval, row[interval]])
+      QUARTER_HOURS.map(([from, to]) => formatTimeInterval(from, to)).map(
+        (interval) => [interval, row[interval]]
+      )
     ),
   };
 }

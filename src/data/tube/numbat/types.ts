@@ -16,23 +16,27 @@ export interface LinkLoad {
   pmPeak: number;
   evening: number;
   late: number;
-  quarterHours: Record<string, number>;
+  quarterHours: Record<TimeInterval, number>;
 }
 
-export const TimeInterval = regex("^\\d{2}\\d{2}-\\d{2}\\d{2}$");
+export const TimeInterval = regex("^\\d\\d\\d\\d-\\d\\d\\d\\d$");
 export type TimeInterval = typeof TimeInterval.infer;
 
-export function formatTimeInterval(from: Date, to: Date): TimeInterval {
-  return `${BigInt(from.getHours())}${BigInt(from.getMinutes())}-${BigInt(
-    to.getHours()
-  )}${BigInt(to.getMinutes())}`;
+function zeroPad(n: number): `${bigint}${bigint}` {
+  return `${BigInt(n) / BigInt(10)}${BigInt(n) % BigInt(10)}`;
 }
 
-export const QUARTER_HOURS = range(0, 24).flatMap((hour) =>
-  range(0, 60, (i) => i, 15).map((minute) =>
-    formatTimeInterval(
+export function formatTimeInterval(from: Date, to: Date): TimeInterval {
+  return `${zeroPad(from.getHours())}${zeroPad(from.getMinutes())}-${zeroPad(
+    to.getHours()
+  )}${zeroPad(to.getMinutes())}`;
+}
+
+export const QUARTER_HOURS: [Date, Date][] = Array.from(
+  range(0, 23).flatMap((hour) =>
+    range(0, 45, (i) => i, 15).map((minute) => [
       new Date(0, 0, 0, hour, minute),
-      new Date(0, 0, 0, hour, minute + 15)
-    )
+      new Date(0, 0, 0, hour, minute + 15),
+    ])
   )
 );

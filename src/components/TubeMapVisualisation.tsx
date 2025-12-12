@@ -29,7 +29,11 @@ import {
   weightLinkSections,
   weightNodesWithMaxLinkWeight,
 } from "@/data/process";
-import { LinkLoad } from "@/data/tube/numbat/types";
+import {
+  formatTimeInterval,
+  LinkLoad,
+  QUARTER_HOURS,
+} from "@/data/tube/numbat/types";
 import { OffsetPath } from "./OffsetPath";
 import { useZoom } from "@/hooks/useZoom";
 
@@ -38,7 +42,25 @@ export function TubeMapVisualisation({
 }: {
   data: Record<string, LinkLoad>;
 }) {
-  const weightedLinks = useMemo(() => weightLinksWithTotalLoad(data), [data]);
+  const [selectedView, setSelectedView] = useState<View>("total");
+  const [selectedInterval, setSelectedInterval] = useState(0);
+
+  const loadView = useMemo(() => {
+    if (selectedView === "total") {
+      return { type: "total" } as const;
+    } else {
+      const [from, to] = QUARTER_HOURS[selectedInterval];
+      return {
+        type: "interval",
+        interval: formatTimeInterval(from, to),
+      } as const;
+    }
+  }, [selectedView, selectedInterval]);
+
+  const weightedLinks = useMemo(
+    () => weightLinksWithLoad(data, loadView),
+    [data, loadView]
+  );
 
   const weightedNodes = useMemo(
     () => weightNodesWithMaxLinkWeight(STATION_NODES, weightedLinks),
@@ -57,10 +79,59 @@ export function TubeMapVisualisation({
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-      <div style={{ padding: "16px" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          gap: "24px",
+          padding: "16px",
+        }}
+      >
         <h1 className={cabin.className} style={{ fontWeight: 800 }}>
           Tube Map Visualisation
         </h1>
+        <div style={{ display: "flex", flexDirection: "row", gap: "8px" }}>
+          <label htmlFor="day-select">Day:</label>
+          <select id="day-select" value="Friday" onChange={() => {}}>
+            <option>Friday</option>
+          </select>
+        </div>
+        <div style={{ display: "flex", flexDirection: "row", gap: "8px" }}>
+          <label htmlFor="view-select">View:</label>
+          <fieldset
+            id="view-select"
+            style={{ display: "flex", flexDirection: "row", gap: "8px" }}
+          >
+            <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+              <input
+                type="radio"
+                id="total-input"
+                checked={selectedView === "total"}
+                onChange={() => setSelectedView("total")}
+              />
+              <label htmlFor="total-input">Total Load</label>
+            </div>
+            <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+              <input
+                name="view"
+                type="radio"
+                id="time-of-day-input"
+                checked={selectedView === "time-of-day"}
+                onChange={() => setSelectedView("time-of-day")}
+              />
+              <label htmlFor="time-of-day-input">Time of Day</label>
+              <button>&#9658;</button>
+              <input
+                type="range"
+                value={selectedInterval}
+                onChange={(e) => setSelectedInterval(parseInt(e.target.value))}
+                min={0}
+                max={QUARTER_HOURS.length - 1}
+              />
+              <Interval interval={QUARTER_HOURS[selectedInterval]} />
+            </div>
+          </fieldset>
+        </div>
       </div>
       <div style={{ display: "flex", flexGrow: 1 }}>
         <WeightedNetworkVisualisation
@@ -72,6 +143,22 @@ export function TubeMapVisualisation({
       </div>
     </div>
   );
+}
+
+type View = "total" | "time-of-day";
+
+function Interval({ interval }: { interval: [Date, Date] }) {
+  const locale: Intl.LocalesArgument = "en-GB";
+
+  const options: Intl.DateTimeFormatOptions = {
+    timeStyle: "short",
+  };
+
+  const [from, to] = interval.map((date) =>
+    date.toLocaleTimeString(locale, options)
+  );
+
+  return `${from}-${to}`;
 }
 
 function WeightedNetworkVisualisation({
