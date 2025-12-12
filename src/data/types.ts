@@ -90,6 +90,8 @@ export interface LinkNodeReference {
 }
 
 export interface LinkSection {
+  from: StationNodeReference | LinkNodeReference;
+  to: StationNodeReference | LinkNodeReference;
   lines: LineReference[];
 }
 

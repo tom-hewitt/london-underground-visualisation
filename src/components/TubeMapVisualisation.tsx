@@ -18,16 +18,17 @@ import {
   Station,
   StationReference,
   WeightedLink,
+  WeightedLinkSection,
   WeightedStationNode,
 } from "@/data/types";
 import { cumsum, max, pairs, scaleLinear } from "d3";
 import { zip } from "radash";
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { weightLinksWithTotalLoad } from "@/data/tube/numbat/process";
+import { weightLinksWithLoad } from "@/data/tube/numbat/process";
 import {
   weightLinkSections,
-  weightNodesWithMaxLinkWeight,
+  weightNodesWithMaxLinkSectionWeight,
 } from "@/data/process";
 import {
   formatTimeInterval,
@@ -62,9 +63,15 @@ export function TubeMapVisualisation({
     [data, loadView]
   );
 
-  const weightedNodes = useMemo(
-    () => weightNodesWithMaxLinkWeight(STATION_NODES, weightedLinks),
+  const weightedLinkSections = useMemo(
+    () => weightLinkSections(LINK_SECTIONS, weightedLinks),
     [weightedLinks]
+  );
+
+  const weightedNodes = useMemo(
+    () =>
+      weightNodesWithMaxLinkSectionWeight(STATION_NODES, weightedLinkSections),
+    [weightedLinkSections]
   );
 
   const maxNodeWeight = useMemo(
@@ -137,6 +144,7 @@ export function TubeMapVisualisation({
         <WeightedNetworkVisualisation
           weightedLinks={weightedLinks}
           weightedNodes={weightedNodes}
+          weightedLinkSections={weightedLinkSections}
           linkSizeScale={scale}
           nodeSizeScale={scale}
         />
@@ -164,19 +172,16 @@ function Interval({ interval }: { interval: [Date, Date] }) {
 function WeightedNetworkVisualisation({
   weightedLinks,
   weightedNodes,
+  weightedLinkSections,
   linkSizeScale,
   nodeSizeScale,
 }: {
   weightedLinks: WeightedLink[];
   weightedNodes: Record<string, WeightedStationNode>;
+  weightedLinkSections: Record<string, WeightedLinkSection>;
   linkSizeScale: (n: number) => number;
   nodeSizeScale: (n: number) => number;
 }) {
-  const weightedLinkSections = useMemo(
-    () => weightLinkSections(LINK_SECTIONS, weightedLinks),
-    [weightedLinks]
-  );
-
   // Calculate the offset for each line at each link node
   const linkSectionOffsets = useMemo(
     () =>

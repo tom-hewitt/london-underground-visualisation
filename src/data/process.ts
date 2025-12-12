@@ -10,16 +10,18 @@ import {
 } from "./types";
 
 /**
- * Weights each station node by the maximum total weight of any link connected to it.
+ * Weights each station node by the maximum total weight of any link section connected to it.
  * @param nodes The station nodes to weight.
  * @param weightedLinks The weighted links between the nodes.
  * @returns The weighted station nodes.
  */
-export function weightNodesWithMaxLinkWeight(
+export function weightNodesWithMaxLinkSectionWeight(
   nodes: Record<string, StationNode>,
-  weightedLinks: WeightedLink[]
+  weightedLinkSections: Record<string, WeightedLinkSection>
 ): Record<string, WeightedStationNode> {
-  return addWeightsToNodes(nodes, (node) => maxLinkWeight(node, weightedLinks));
+  return addWeightsToNodes(nodes, (node) =>
+    maxLinkSectionWeight(node, weightedLinkSections)
+  );
 }
 
 /**
@@ -52,6 +54,8 @@ export function weightLinkSections(
 
       if (!(sectionId in weightedSections)) {
         weightedSections[sectionId] = {
+          from: previousNode,
+          to: currentNode,
           lines: structuredClone(weightedLines), // Deep copy since weights may be mutated by future links
         };
       } else {
@@ -104,15 +108,16 @@ function addWeightsToNodes(
   );
 }
 
-function maxLinkWeight(
+function maxLinkSectionWeight(
   node: StationNode,
-  weightedLinks: WeightedLink[]
+  weightedLinkSections: Record<string, WeightedLinkSection>
 ): number {
   return (
     max(
-      weightedLinks.filter(
+      Object.values(weightedLinkSections).filter(
         (link) =>
-          link.to.nodeName === node.name || link.from.nodeName === node.name
+          ("nodeName" in link.to && link.to.nodeName === node.name) ||
+          ("nodeName" in link.from && link.from.nodeName === node.name)
       ),
       (link) => sum(link.lines, (line) => line.weight)
     ) ?? 0
