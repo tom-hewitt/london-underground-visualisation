@@ -14,7 +14,7 @@ import { sum } from "d3";
  */
 export function weightLinksWithLoad(
   data: Record<string, LinkLoad>,
-  view: LoadView
+  accessor: (linkLoad: LinkLoad) => number
 ): WeightedLink[] {
   return LINKS.map((link) => ({
     ...link,
@@ -23,10 +23,7 @@ export function weightLinksWithLoad(
     lines: link.lines.map((line) => {
       const linkLoads = linkNames(line, link.from, link.to).map((name) => {
         if (name in data) {
-          if (view.type == "total") {
-            return data[name].total;
-          }
-          return data[name].quarterHours[view.interval];
+          return accessor(data[name]);
         } else {
           console.warn(`Missing load data for link: ${name}`);
           return 0;
@@ -47,10 +44,6 @@ export function weightLinksWithLoad(
     }),
   }));
 }
-
-export type LoadView =
-  | { type: "total" }
-  | { type: "interval"; interval: TimeInterval };
 
 export function resolveStationNodeReference(
   reference: StationNodeReference

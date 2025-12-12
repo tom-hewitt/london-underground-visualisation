@@ -46,38 +46,41 @@ export function TubeMapVisualisation({
   const [selectedView, setSelectedView] = useState<View>("total");
   const [selectedInterval, setSelectedInterval] = useState(0);
 
-  const loadView = useMemo(() => {
-    if (selectedView === "total") {
-      return { type: "total" } as const;
-    } else {
-      const [from, to] = QUARTER_HOURS[selectedInterval];
-      return {
-        type: "interval",
-        interval: formatTimeInterval(from, to),
-      } as const;
-    }
-  }, [selectedView, selectedInterval]);
-
-  const weightedLinks = useMemo(
-    () => weightLinksWithLoad(data, loadView),
-    [data, loadView]
+  const totalGraph = useMemo(
+    () => prepareGraph(data, (linkLoad) => linkLoad.total),
+    [data]
   );
 
-  const weightedLinkSections = useMemo(
-    () => weightLinkSections(LINK_SECTIONS, weightedLinks),
-    [weightedLinks]
-  );
-
-  const weightedNodes = useMemo(
+  const timeOfDayGraphs = useMemo(
     () =>
-      weightNodesWithMaxLinkSectionWeight(STATION_NODES, weightedLinkSections),
-    [weightedLinkSections]
+      QUARTER_HOURS.map(([from, to]) =>
+        prepareGraph(
+          data,
+          (linkLoad) => linkLoad.quarterHours[formatTimeInterval(from, to)]
+        )
+      ),
+    [data]
   );
 
-  const maxNodeWeight = useMemo(
-    () => max(Object.values(weightedNodes), (node) => node.weight) ?? 0,
-    [weightedNodes]
-  );
+  const { weightedLinks, weightedLinkSections, weightedNodes } = useMemo(() => {
+    if (selectedView === "total") {
+      return totalGraph;
+    }
+
+    return timeOfDayGraphs[selectedInterval];
+  }, [selectedView, selectedInterval, totalGraph, timeOfDayGraphs]);
+
+  const maxNodeWeight = useMemo(() => {
+    if (selectedView === "total") {
+      return max(Object.values(weightedNodes), (node) => node.weight) ?? 0;
+    }
+
+    return (
+      max(timeOfDayGraphs, ({ weightedNodes }) =>
+        max(Object.values(weightedNodes), (node) => node.weight)
+      ) ?? 0
+    );
+  }, [weightedNodes]);
 
   const scale = useMemo(
     () => scaleLinear().domain([0, maxNodeWeight]).range([0, 10]),
@@ -151,6 +154,26 @@ export function TubeMapVisualisation({
       </div>
     </div>
   );
+}
+
+function prepareGraph(
+  data: Record<string, LinkLoad>,
+  weightAccessor: (linkLoad: LinkLoad) => number
+): {
+  weightedLinks: WeightedLink[];
+  weightedLinkSections: Record<string, WeightedLinkSection>;
+  weightedNodes: Record<string, WeightedStationNode>;
+} {
+  const weightedLinks = weightLinksWithLoad(data, weightAccessor);
+
+  const weightedLinkSections = weightLinkSections(LINK_SECTIONS, weightedLinks);
+
+  const weightedNodes = weightNodesWithMaxLinkSectionWeight(
+    STATION_NODES,
+    weightedLinkSections
+  );
+
+  return { weightedLinks, weightedLinkSections, weightedNodes };
 }
 
 type View = "total" | "time-of-day";
