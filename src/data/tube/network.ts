@@ -1042,8 +1042,8 @@ export const STATION_NODES: Record<string, StationNode> = {
   ALEu_DIS: {
     name: "ALEu_DIS",
     station: { nlc: 503 },
-    x: 679.29,
-    y: 396.67,
+    x: 679.1,
+    y: 396.7,
   },
   ERDu_DIS: {
     name: "ERDu_DIS",
@@ -1541,8 +1541,9 @@ export const LINK_NODES: Record<string, LinkNode> = {
 
   // Circle
   "KXX-FAR": { x: 553.5, y: 348.7 },
-  "PAD-BAY": { x: 355.3, y: 356.425 },
-  "HST-GRD": { x: 355.3, y: 479.6 },
+  "PAD-BAY": { x: 355.3, y: 359 },
+  "HST-GRD-0": { x: 355.3, y: 474.5 },
+  "HST-GRD-1": { x: 359.8, y: 479.6 },
 
   // District
   "ERDu_DIS-PADu_DIS": { x: 382.7, y: 356.425 },
@@ -1557,7 +1558,8 @@ export const LINK_NODES: Record<string, LinkNode> = {
   // Jubilee
   "LON-SWK-0": { x: 593.5, y: 481 },
   "LON-SWK-1": { x: 551, y: 523.9 },
-  "SWKu_JUB-WLOu_JUB-0": { x: 495.3, y: 523.9 },
+  "SWK-WLO-0": { x: 498.7, y: 523.9 },
+  "SWK-WLO-1": { x: 495.3, y: 520.5 },
   "WLOu_JUB-WMSu_JUB-0": { x: 495.4, y: 486 },
   "GPK-BDS": { x: 429.3, y: 419.5 },
 
@@ -1571,14 +1573,18 @@ export const LINK_NODES: Record<string, LinkNode> = {
   "WST-EUS-0": { x: 502.5, y: 352.5 },
   "WST-EUS-1": { x: 514.4, y: 341 },
   "BOR-LON": { x: 602.6, y: 496.5 },
-  "OLD-ANG": { x: 602.5, y: 344.3 },
-  "ANG-KXX": { x: 553.3, y: 344.3 },
+  "OLD-ANG-0": { x: 602.5, y: 349 },
+  "OLD-ANG-1": { x: 598, y: 344.3 },
+  "ANG-KXX": { x: 559, y: 344.3 },
 
-  "THL-AL-0": { x: 659, y: 436.5 },
-  "THL-AL-1": { x: 659, y: 418.5 },
+  "THL-AL-0": { x: 654, y: 436.5 },
+  "THL-AL-1": { x: 659, y: 432 },
+  "THL-AL-2": { x: 659, y: 418.5 },
 
-  "ALEu-LSTu_MET": { x: 671, y: 403 },
-  "AL-LSTu": { x: 657.7, y: 390.3 },
+  "ALE-LST-0": { x: 672.7, y: 403.2 },
+  "ALE-LST-1": { x: 667, y: 403.2 },
+  "AL-LST-0": { x: 657.7, y: 395 },
+  "AL-LST-1": { x: 653, y: 390.3 },
 
   "MGT-LST": { x: 595.5, y: 390.3 }, // TODO: this doesn't work if LST-MGT - some weird alphabetic stuff going on
 
@@ -1599,17 +1605,24 @@ export const LINK_NODES: Record<string, LinkNode> = {
 };
 
 export const LINK_SECTIONS: Record<string, LinkSection> = {
-  "ALEu_DIS-ALEu-LSTu_MET": {
-    lines: [{ lineName: "H&C" }, { lineName: "District" }],
+  "ALE-LST-0-ALEu_DIS": {
+    lines: [{ lineName: "District" }, { lineName: "H&C" }],
   },
-  "AL-LSTu-LSTu_MET": {
+  "AL-LST-0-AL-LST-1": {
     lines: [
       { lineName: "H&C" },
       { lineName: "Circle" },
       { lineName: "Metropolitan" },
     ],
   },
-  "AL-LSTu-ALDu_MET": {
+  "AL-LST-1-LSTu_MET": {
+    lines: [
+      { lineName: "H&C" },
+      { lineName: "Circle" },
+      { lineName: "Metropolitan" },
+    ],
+  },
+  "AL-LST-0-ALDu_MET": {
     lines: [{ lineName: "Metropolitan" }, { lineName: "Circle" }],
   },
   "THL-AL-0-THLu_DIS": {
@@ -1618,13 +1631,16 @@ export const LINK_SECTIONS: Record<string, LinkSection> = {
   "THL-AL-0-THL-AL-1": {
     lines: [{ lineName: "District" }, { lineName: "Circle" }],
   },
+  "THL-AL-1-THL-AL-2": {
+    lines: [{ lineName: "District" }, { lineName: "Circle" }],
+  },
   "BNKu_WAC-STP-BNK": {
     lines: [{ lineName: "Central" }, { lineName: "Waterloo & City" }],
   },
-  "HST-GRD-HSTu_DIS": {
+  "HST-GRD-0-HSTu_DIS": {
     lines: [{ lineName: "Circle" }, { lineName: "District" }],
   },
-  "GRDu_DIS-HST-GRD": {
+  "GRDu_DIS-HST-GRD-1": {
     lines: [{ lineName: "Circle" }, { lineName: "District" }],
   },
 };
@@ -1727,7 +1743,7 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Jubilee" }],
     from: { nodeName: "SWKu_JUB" },
     to: { nodeName: "WLOu_JUB" },
-    path: [{ linkNodeName: "SWKu_JUB-WLOu_JUB-0" }],
+    path: [{ linkNodeName: "SWK-WLO-0" }, { linkNodeName: "SWK-WLO-1" }],
   },
   {
     lines: [{ lineName: "Jubilee" }],
@@ -1964,7 +1980,7 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Northern" }],
     from: { nodeName: "OLDu_NOR" },
     to: { nodeName: "ANGu_NOR" },
-    path: [{ linkNodeName: "OLD-ANG" }],
+    path: [{ linkNodeName: "OLD-ANG-0" }, { linkNodeName: "OLD-ANG-1" }],
   },
   {
     lines: [{ lineName: "Northern" }],
@@ -2089,14 +2105,23 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Circle" }],
     from: { nodeName: "THLu_DIS", directions: ["EB", "WB"] },
     to: { nodeName: "ALDu_MET", directions: ["NB", "SB"] },
-    path: [{ linkNodeName: "THL-AL-0" }, { linkNodeName: "THL-AL-1" }],
+    path: [
+      { linkNodeName: "THL-AL-0" },
+      { linkNodeName: "THL-AL-1" },
+      { linkNodeName: "THL-AL-2" },
+    ],
   },
 
   {
     lines: [{ lineName: "H&C" }],
     from: { nodeName: "ALEu_DIS", directions: ["WB", "EB"] },
     to: { nodeName: "LSTu_MET", directions: ["NB", "SB"] },
-    path: [{ linkNodeName: "ALEu-LSTu_MET" }, { linkNodeName: "AL-LSTu" }],
+    path: [
+      { linkNodeName: "ALE-LST-0" },
+      { linkNodeName: "ALE-LST-1" },
+      { linkNodeName: "AL-LST-0" },
+      { linkNodeName: "AL-LST-1" },
+    ],
   },
   {
     lines: [
@@ -2180,14 +2205,14 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "Circle" }],
     from: { nodeName: "HSTu_DIS", directions: ["WB", "EB"] },
     to: { nodeName: "GRDu_DIS", directions: ["EB", "WB"] },
-    path: [{ linkNodeName: "HST-GRD" }],
+    path: [{ linkNodeName: "HST-GRD-0" }, { linkNodeName: "HST-GRD-1" }],
   },
 
   {
     lines: [{ lineName: "Metropolitan" }, { lineName: "Circle" }],
     from: { nodeName: "ALDu_MET", directions: ["NB", "SB"] },
     to: { nodeName: "LSTu_MET", directions: ["NB", "SB"] },
-    path: [{ linkNodeName: "AL-LSTu" }],
+    path: [{ linkNodeName: "AL-LST-0" }, { linkNodeName: "AL-LST-1" }],
   },
 
   // District
@@ -2211,13 +2236,13 @@ export const LINKS: Link[] = [
     lines: [{ lineName: "District" }],
     from: { nodeName: "ECTu_DIS" },
     to: { nodeName: "HSTu_DIS" },
-    path: [{ linkNodeName: "HST-GRD" }],
+    path: [{ linkNodeName: "HST-GRD-0" }],
   },
   {
     lines: [{ lineName: "District" }],
     from: { nodeName: "ECTu_DIS" },
     to: { nodeName: "GRDu_DIS" },
-    path: [{ linkNodeName: "HST-GRD" }],
+    path: [{ linkNodeName: "HST-GRD-1" }],
   },
   {
     lines: [{ lineName: "District" }, { lineName: "Circle" }],
@@ -2252,7 +2277,8 @@ export const LINKS: Link[] = [
     path: [
       { linkNodeName: "THL-AL-0" },
       { linkNodeName: "THL-AL-1" },
-      { linkNodeName: "ALEu-LSTu_MET" },
+      { linkNodeName: "THL-AL-2" },
+      { linkNodeName: "ALE-LST-0" },
     ],
   },
 ];
