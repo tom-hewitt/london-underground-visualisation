@@ -547,7 +547,7 @@ function StationView({
 function InterchangeStation({
   nodes,
   outlineWidth = 0.6,
-  joinWidth = 1.2,
+  joinWidth = 0.6,
   scale,
   hovered,
   setHovered,
