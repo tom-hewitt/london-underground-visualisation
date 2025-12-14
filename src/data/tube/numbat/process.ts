@@ -32,7 +32,7 @@ export function weightLinksWithLoad(
 
       const totalLoad = sum(linkLoads);
 
-      // Hack to split H&C and Circle load
+      // HACK: split H&C and Circle load
       if (
         link.lines.some((l) => l.lineName === "H&C") &&
         link.lines.some((l) => l.lineName === "Circle")
@@ -58,6 +58,14 @@ function linkNames(
   from: StationNodeReference & { directions?: [string, string] },
   to: StationNodeReference & { directions?: [string, string] }
 ): string[] {
+  // HACK: special case for missing Edgeware Road node in dataset
+  if (from.nodeName === "ERDu_DISa" || from.nodeName === "ERDu_DISb") {
+    from = { ...from, nodeName: "ERDu_DIS" };
+  }
+  if (to.nodeName === "ERDu_DISa" || to.nodeName === "ERDu_DISb") {
+    to = { ...to, nodeName: "ERDu_DIS" };
+  }
+
   const { directions, abbreviation } = LINES[line.lineName];
 
   const fromDirections = from.directions ?? directions;

@@ -523,11 +523,11 @@ export const STATION_LABELS: StationLabel[] = [
     name: "Edgware Road",
     station: { nlc: 569 },
     position: {
-      node: { nodeName: "ERDu_DIS" },
+      node: { nodeName: "ERDu_DISb" },
     },
     alignment: {
       textAnchor: "start",
-      dominantBaseline: "text-before-edge",
+      dominantBaseline: "middle",
     },
   },
   {
@@ -1045,11 +1045,17 @@ export const STATION_NODES: Record<string, StationNode> = {
     x: 679.1,
     y: 396.7,
   },
-  ERDu_DIS: {
-    name: "ERDu_DIS",
+  ERDu_DISa: {
+    name: "ERDu_DISa",
     station: { nlc: 569 },
     x: 382.7,
     y: 347.6,
+  },
+  ERDu_DISb: {
+    name: "ERDu_DISb",
+    station: { nlc: 569 },
+    x: 382.7,
+    y: 353.6,
   },
   PADu_DIS: {
     name: "PADu_DIS",
@@ -1546,7 +1552,7 @@ export const LINK_NODES: Record<string, LinkNode> = {
   "HST-GRD-1": { x: 359.8, y: 479.6 },
 
   // District
-  "ERDu_DIS-PADu_DIS": { x: 382.7, y: 356.425 },
+  "ERD-PAD": { x: 361.5, y: 353.6 },
   "CST-BNK": { x: 594, y: 436.5 },
   "TEM-BLF": { x: 551.5, y: 479.6 },
 
@@ -1642,6 +1648,9 @@ export const LINK_SECTIONS: Record<string, LinkSection> = {
   },
   "GRDu_DIS-HST-GRD-1": {
     lines: [{ lineName: "Circle" }, { lineName: "District" }],
+  },
+  "ERD-PAD-PADu_DIS": {
+    lines: [{ lineName: "District" }, { lineName: "Circle" }],
   },
 };
 
@@ -2187,19 +2196,19 @@ export const LINKS: Link[] = [
   {
     lines: [{ lineName: "H&C" }, { lineName: "Circle" }],
     from: { nodeName: "BSTu_HAM", directions: ["WB", "EB"] },
-    to: { nodeName: "ERDu_DIS", directions: ["WB", "EB"] },
+    to: { nodeName: "ERDu_DISa", directions: ["WB", "EB"] },
   },
   {
     lines: [{ lineName: "H&C" }, { lineName: "Circle" }],
-    from: { nodeName: "ERDu_DIS", directions: ["WB", "EB"] },
+    from: { nodeName: "ERDu_DISa", directions: ["WB", "EB"] },
     to: { nodeName: "PADu_HAM", directions: ["WB", "EB"] },
   },
 
   {
-    lines: [{ lineName: "Circle" }], // TODO: Displayed as district and circle on map but no district data exists?
-    from: { nodeName: "ERDu_DIS", directions: ["WB", "EB"] },
+    lines: [{ lineName: "Circle" }, { lineName: "District" }],
+    from: { nodeName: "ERDu_DISb", directions: ["WB", "EB"] },
     to: { nodeName: "PADu_DIS", directions: ["WB", "EB"] },
-    path: [{ linkNodeName: "ERDu_DIS-PADu_DIS" }],
+    path: [{ linkNodeName: "ERD-PAD" }],
   },
   {
     lines: [{ lineName: "Circle" }],
