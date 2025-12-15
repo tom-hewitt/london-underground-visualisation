@@ -12,10 +12,7 @@ import { sum } from "d3";
  * @param data A mapping of link names to their load data.
  * @returns An array of weighted links.
  */
-export function weightLinksWithLoad(
-  data: Record<string, LinkLoad>,
-  accessor: (linkLoad: LinkLoad) => number
-): WeightedLink[] {
+export function weightLinks(data: LinkWeights): WeightedLink[] {
   return LINKS.map((link) => ({
     ...link,
     from: resolveStationNodeReference(link.from),
@@ -23,7 +20,7 @@ export function weightLinksWithLoad(
     lines: link.lines.map((line) => {
       const linkLoads = linkNames(line, link.from, link.to).map((name) => {
         if (name in data) {
-          return accessor(data[name]);
+          return data[name];
         } else {
           console.warn(`Missing load data for link: ${name}`);
           return 0;
@@ -44,6 +41,8 @@ export function weightLinksWithLoad(
     }),
   }));
 }
+
+export type LinkWeights = Record<string, number>;
 
 export function resolveStationNodeReference(
   reference: StationNodeReference

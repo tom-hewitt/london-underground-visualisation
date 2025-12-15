@@ -25,62 +25,43 @@ import { cumsum, max, pairs, scaleLinear } from "d3";
 import { zip } from "radash";
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { weightLinksWithLoad } from "@/data/tube/numbat/process";
+import { LinkWeights, weightLinks } from "@/data/tube/numbat/process";
 import {
   weightLinkSections,
   weightNodesWithMaxLinkSectionWeight,
 } from "@/data/process";
-import {
-  formatTimeInterval,
-  LinkLoad,
-  QUARTER_HOURS,
-} from "@/data/tube/numbat/types";
 import { OffsetPath } from "./OffsetPath";
 import { useZoom } from "@/hooks/useZoom";
 
-export function TubeMapVisualisation({
-  data,
+export function YearlyTubeMapVisualisation({
+  dataPerYear,
 }: {
-  data: Record<string, LinkLoad>;
+  dataPerYear: Record<string, LinkWeights>;
 }) {
-  const [selectedView, setSelectedView] = useState<View>("total");
-  const [selectedInterval, setSelectedInterval] = useState(0);
+  const [selectedYearIndex, setSelectedYearIndex] = useState(0);
 
-  const totalGraph = useMemo(
-    () => prepareGraph(data, (linkLoad) => linkLoad.total),
-    [data]
-  );
+  const years = useMemo(() => Object.keys(dataPerYear).sort(), [dataPerYear]);
 
-  const timeOfDayGraphs = useMemo(
+  const yearlyGraphs = useMemo(
     () =>
-      QUARTER_HOURS.map(([from, to]) =>
-        prepareGraph(
-          data,
-          (linkLoad) => linkLoad.quarterHours[formatTimeInterval(from, to)]
-        )
-      ),
-    [data]
+      years
+        .map((year) => dataPerYear[year])
+        .map((yearData) => prepareGraph(yearData)),
+    [dataPerYear, years]
   );
 
-  const { weightedLinks, weightedLinkSections, weightedNodes } = useMemo(() => {
-    if (selectedView === "total") {
-      return totalGraph;
-    }
+  const { weightedLinks, weightedLinkSections, weightedNodes } = useMemo(
+    () => yearlyGraphs[selectedYearIndex],
+    [selectedYearIndex, yearlyGraphs, years]
+  );
 
-    return timeOfDayGraphs[selectedInterval];
-  }, [selectedView, selectedInterval, totalGraph, timeOfDayGraphs]);
-
-  const maxNodeWeight = useMemo(() => {
-    if (selectedView === "total") {
-      return max(Object.values(weightedNodes), (node) => node.weight) ?? 0;
-    }
-
-    return (
-      max(timeOfDayGraphs, ({ weightedNodes }) =>
+  const maxNodeWeight = useMemo(
+    () =>
+      max(yearlyGraphs, ({ weightedNodes }) =>
         max(Object.values(weightedNodes), (node) => node.weight)
-      ) ?? 0
-    );
-  }, [weightedNodes]);
+      ) ?? 0,
+    [weightedNodes]
+  );
 
   const scale = useMemo(
     () => scaleLinear().domain([0, maxNodeWeight]).range([0, 10]),
@@ -101,46 +82,17 @@ export function TubeMapVisualisation({
           Tube Map Visualisation
         </h1>
         <div style={{ display: "flex", flexDirection: "row", gap: "8px" }}>
-          <label htmlFor="day-select">Day:</label>
-          <select id="day-select" value="Friday" onChange={() => {}}>
-            <option>Friday</option>
-          </select>
-        </div>
-        <div style={{ display: "flex", flexDirection: "row", gap: "8px" }}>
-          <label htmlFor="view-select">View:</label>
-          <fieldset
-            id="view-select"
-            style={{ display: "flex", flexDirection: "row", gap: "8px" }}
-          >
-            <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
-              <input
-                type="radio"
-                id="total-input"
-                checked={selectedView === "total"}
-                onChange={() => setSelectedView("total")}
-              />
-              <label htmlFor="total-input">Total Load</label>
-            </div>
-            <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
-              <input
-                name="view"
-                type="radio"
-                id="time-of-day-input"
-                checked={selectedView === "time-of-day"}
-                onChange={() => setSelectedView("time-of-day")}
-              />
-              <label htmlFor="time-of-day-input">Time of Day</label>
-              <button>&#9658;</button>
-              <input
-                type="range"
-                value={selectedInterval}
-                onChange={(e) => setSelectedInterval(parseInt(e.target.value))}
-                min={0}
-                max={QUARTER_HOURS.length - 1}
-              />
-              <Interval interval={QUARTER_HOURS[selectedInterval]} />
-            </div>
-          </fieldset>
+          <label htmlFor="year-input">Year:</label>
+          <button>&#9658;</button>
+          <input
+            id="year-input"
+            type="range"
+            value={selectedYearIndex}
+            onChange={(e) => setSelectedYearIndex(parseInt(e.target.value))}
+            min={0}
+            max={years.length - 1}
+          />
+          <p>{years[selectedYearIndex]}</p>
         </div>
       </div>
       <div style={{ display: "flex", flexGrow: 1 }}>
@@ -156,15 +108,12 @@ export function TubeMapVisualisation({
   );
 }
 
-function prepareGraph(
-  data: Record<string, LinkLoad>,
-  weightAccessor: (linkLoad: LinkLoad) => number
-): {
+function prepareGraph(data: LinkWeights): {
   weightedLinks: WeightedLink[];
   weightedLinkSections: Record<string, WeightedLinkSection>;
   weightedNodes: Record<string, WeightedStationNode>;
 } {
-  const weightedLinks = weightLinksWithLoad(data, weightAccessor);
+  const weightedLinks = weightLinks(data);
 
   const weightedLinkSections = weightLinkSections(LINK_SECTIONS, weightedLinks);
 
@@ -377,6 +326,7 @@ type HoveredItem =
   | { type: "link"; link: LinkReference }
   | { type: "station"; station: StationReference; element: "node" | "label" };
 
+// TODO: use dashed stroke with dash gaps proportional to gaps between services, dash length proportional to num carriages, width proportional to load per carriage
 function LinkView({
   link,
   line,
