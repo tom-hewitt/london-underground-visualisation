@@ -43,10 +43,7 @@ export function YearlyTubeMapVisualisation({
   const years = useMemo(() => Object.keys(dataPerYear).sort(), [dataPerYear]);
 
   const yearlyGraphs = useMemo(
-    () =>
-      years
-        .map((year) => dataPerYear[year])
-        .map((yearData) => prepareGraph(yearData)),
+    () => years.map((year) => prepareGraph(dataPerYear[year], year)),
     [dataPerYear, years]
   );
 
@@ -83,7 +80,6 @@ export function YearlyTubeMapVisualisation({
         </h1>
         <div style={{ display: "flex", flexDirection: "row", gap: "8px" }}>
           <label htmlFor="year-input">Year:</label>
-          <button>&#9658;</button>
           <input
             id="year-input"
             type="range"
@@ -108,12 +104,15 @@ export function YearlyTubeMapVisualisation({
   );
 }
 
-function prepareGraph(data: LinkWeights): {
+function prepareGraph(
+  data: LinkWeights,
+  year: string
+): {
   weightedLinks: WeightedLink[];
   weightedLinkSections: Record<string, WeightedLinkSection>;
   weightedNodes: Record<string, WeightedStationNode>;
 } {
-  const weightedLinks = weightLinks(data);
+  const weightedLinks = weightLinks(data, year);
 
   const weightedLinkSections = weightLinkSections(LINK_SECTIONS, weightedLinks);
 

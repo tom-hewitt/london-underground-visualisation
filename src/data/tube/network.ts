@@ -1572,7 +1572,7 @@ export const LINK_NODES: Record<string, LinkNode> = {
   // Northern
   "OVLu_NOR-KENu_NOR-0": { x: 492.8, y: 599.9 },
   "OVLu_NOR-KENu_NORx-1": { x: 492.8, y: 593.25 },
-  "OVLu_NOR-KENu_NORx-2": { x: 498.5, y: 587.8 },
+  "OVLu_NOR-KENu_NORx-2": { x: 497, y: 587.8 },
   "OVLu_NOR-KENu_NORb-1": { x: 499, y: 599.9 },
   "NIE-KEN-0": { x: 458, y: 571.6 },
   "NIE-KEN-1": { x: 474, y: 587.8 },
