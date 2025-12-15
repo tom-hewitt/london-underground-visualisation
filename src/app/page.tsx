@@ -1,19 +1,22 @@
 import {
-  fetchAllNumbatWorkbooks,
+  fetchAllNumbatData,
   parseLinkLoadData,
 } from "@/data/tube/numbat/fetch";
 import { YearlyTubeMapVisualisation } from "@/components/TubeMapVisualisation";
 import { LinkWeights } from "@/data/tube/numbat/process";
+import { read } from "xlsx";
 
 export default async function Home() {
   "use cache";
 
   const dataPerYear: Record<string, LinkWeights> = {};
 
-  for (const [year, days] of fetchAllNumbatWorkbooks()) {
+  for (const [year, days] of await fetchAllNumbatData()) {
     const dataPerDay: Record<string, number[]> = {};
 
-    for await (const [_, workbook] of days) {
+    for (const [_, data] of days) {
+      const workbook = read(data, { type: "array" });
+
       const linkLoadData = parseLinkLoadData(workbook);
 
       for (const [linkName, load] of Object.entries(linkLoadData)) {

@@ -8,8 +8,8 @@ import {
 } from "./types";
 import { readFile } from "fs/promises";
 
-export function* fetchAllNumbatWorkbooks(): Generator<
-  [string, AsyncGenerator<[string, WorkBook]>]
+export async function fetchAllNumbatData(): Promise<
+  [string, [string, NumbatFileBuffer][]][]
 > {
   const years = {
     "2016": {
@@ -69,16 +69,17 @@ export function* fetchAllNumbatWorkbooks(): Generator<
     },
   } as const;
 
-  for (const [year, days] of Object.entries(years)) {
-    yield [
+  return Promise.all(
+    Object.entries(years).map(async ([year, days]) => [
       year,
-      (async function* () {
-        for (const [day, path] of Object.entries(days)) {
-          yield [day, await fetchNumbatWorkbook(path)];
-        }
-      })(),
-    ];
-  }
+      await Promise.all(
+        Object.entries(days).map(async ([day, path]) => [
+          day,
+          await fetchNumbatFileBuffer(path),
+        ])
+      ),
+    ])
+  );
 }
 
 export async function fetchNumbatWorkbook(path: string): Promise<WorkBook> {
