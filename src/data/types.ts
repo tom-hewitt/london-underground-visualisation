@@ -1,3 +1,5 @@
+import { type } from "arktype";
+
 export interface Station {
   name: string;
   nlc: number;
@@ -73,6 +75,15 @@ export interface WeightedLink extends Link {
   lines: WeightedLineReference[];
 }
 
+export interface WeightedLineReferenceWithFrequency
+  extends WeightedLineReference {
+  frequencies: [number, number];
+}
+
+export interface WeightedLinkWithFrequencies extends WeightedLink {
+  lines: WeightedLineReferenceWithFrequency[];
+}
+
 export interface LinkReference {
   from: StationNodeReference;
   to: StationNodeReference;
@@ -107,3 +118,9 @@ export interface PathNode {
 }
 
 export type NonEmptyArray<T> = [T, ...T[]];
+
+export const DayOfWeek = type(
+  "'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday'"
+);
+
+export type DayOfWeek = typeof DayOfWeek.infer;

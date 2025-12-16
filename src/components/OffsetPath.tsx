@@ -1,4 +1,5 @@
 import { pairs, path } from "d3";
+import { motion, SVGMotionProps } from "motion/react";
 import { zip } from "radash";
 import { useMemo } from "react";
 
@@ -9,7 +10,7 @@ export function OffsetPath({
 }: {
   nodes: Vector2D[];
   sectionOffsets: number[];
-} & Omit<React.SVGProps<SVGPathElement>, "d">) {
+} & Omit<SVGMotionProps<SVGPathElement>, "d">) {
   if (nodes.length < 2) {
     return null;
   }
@@ -89,7 +90,7 @@ export function OffsetPath({
     return pathBuilder.toString();
   }, [lines]);
 
-  return <path d={pathString} {...props} />;
+  return <motion.path d={pathString} {...props} />;
 }
 
 export interface Vector2D {

@@ -1,8 +1,8 @@
 import { StationReference } from "@/data/types";
-import { regex } from "arktype";
+import { regex, type } from "arktype";
 import { range } from "radash";
 
-export interface LinkLoad {
+export interface LinkData {
   link: string;
   line: string;
   from: StationReference;
@@ -19,7 +19,7 @@ export interface LinkLoad {
   quarterHours: Record<TimeInterval, number>;
 }
 
-export const TimeInterval = regex("^\\d\\d\\d\\d-\\d\\d\\d\\d$");
+export const TimeInterval = type(regex("^\\d\\d\\d\\d-\\d\\d\\d\\d$"));
 export type TimeInterval = typeof TimeInterval.infer;
 
 function zeroPad(n: number): `${bigint}${bigint}` {
@@ -40,3 +40,5 @@ export const QUARTER_HOURS: [Date, Date][] = Array.from(
     ])
   )
 );
+
+export type NumbatDays = "MON" | "MTT" | "TWT" | "FRI" | "SAT" | "SUN";

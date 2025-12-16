@@ -2,9 +2,10 @@ import {
   LineReference,
   StationNodeReference,
   WeightedLink,
+  WeightedLinkWithFrequencies,
 } from "@/data/types";
 import { LINES, LINKS, STATION_NODE_ALIASES } from "../network";
-import { LinkLoad, TimeInterval } from "./types";
+import { LinkData, TimeInterval } from "./types";
 import { sum } from "d3";
 
 /**
@@ -47,6 +48,33 @@ export function weightLinks(
   }));
 }
 
+export function addFrequenciesToWeightedLinks(
+  weightedLinks: WeightedLink[],
+  frequencyData: LinkWeights,
+  year: string = "2024"
+): WeightedLinkWithFrequencies[] {
+  return weightedLinks.map((link) => ({
+    ...link,
+    lines: link.lines.map((line) => {
+      const linkFrequencies = linkNames(line, link.from, link.to, year).map(
+        (name) => {
+          if (name in frequencyData) {
+            return frequencyData[name];
+          } else {
+            console.warn(`Missing load data for link: ${name}`);
+            return 0;
+          }
+        }
+      ) as [number, number];
+
+      return {
+        ...line,
+        frequencies: linkFrequencies,
+      };
+    }),
+  }));
+}
+
 export type LinkWeights = Record<string, number>;
 
 export function resolveStationNodeReference(
@@ -62,7 +90,7 @@ function linkNames(
   from: StationNodeReference & { directions?: [string, string] },
   to: StationNodeReference & { directions?: [string, string] },
   year: string = "2024"
-): string[] {
+): [string, string] {
   // HACK: special case for missing Edgeware Road node in dataset
   if (from.nodeName === "ERDu_DISa" || from.nodeName === "ERDu_DISb") {
     from = { ...from, nodeName: "ERDu_DIS" };

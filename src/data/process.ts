@@ -1,4 +1,4 @@
-import { max, pairs, sum } from "d3";
+import { cumsum, max, pairs, sum } from "d3";
 import {
   LinkNodeReference,
   LinkSection,
@@ -8,6 +8,7 @@ import {
   WeightedLinkSection,
   WeightedStationNode,
 } from "./types";
+import { zip } from "radash";
 
 /**
  * Weights each station node by the maximum total weight of any link section connected to it.
@@ -74,6 +75,38 @@ export function weightLinkSections(
   }
 
   return weightedSections;
+}
+
+/**
+ * Calculates the offset for each line at each link node based on the line weights
+ */
+export function offsetLinkLinesByWeight(
+  weightedLinkSections: Record<string, WeightedLinkSection>,
+  offsetScale: (n: number) => number
+): Record<string, Record<string, number>> {
+  return Object.fromEntries(
+    Object.entries(weightedLinkSections).map(([sectionId, section]) => {
+      const cumulativeWeights = [
+        ...cumsum(section.lines, (line) => line.weight),
+      ];
+      const totalLoad = cumulativeWeights[cumulativeWeights.length - 1] ?? 0;
+
+      return [
+        sectionId,
+        Object.fromEntries(
+          zip(section.lines, cumulativeWeights).map(
+            ([line, cumulativeWeight]) => [
+              line.lineName,
+
+              offsetScale(cumulativeWeight) -
+                offsetScale(line.weight) / 2 -
+                offsetScale(totalLoad) / 2,
+            ]
+          )
+        ),
+      ];
+    })
+  );
 }
 
 function linkSectionId(
