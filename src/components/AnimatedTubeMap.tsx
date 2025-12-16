@@ -19,93 +19,51 @@ export async function AnimatedTubeMap({
 }: {
   numbatData: [string, [NumbatDays, NumbatFileBuffer][]][];
 }) {
-  const load: Partial<Record<DayOfWeek, Record<TimeInterval, LinkWeights>>> =
-    {};
-  const frequency: Partial<
-    Record<DayOfWeek, Record<TimeInterval, LinkWeights>>
-  > = {};
-
   // Only use latest year to reduce data size
   const [year, days] = numbatData[numbatData.length - 1];
 
-  for (const [day, data] of days) {
-    const workbook = read(data, { type: "array" });
+  // Only use Friday data for animated map to reduce data size
+  const [day, data] = days.find(([day, _]) => day === "FRI")!;
 
-    const linkLoadData = parseLinkLoadData(workbook);
+  const workbook = read(data, { type: "array" });
 
-    const dayLoadData: Record<TimeInterval, LinkWeights> = {};
+  const linkLoadData = parseLinkLoadData(workbook);
 
-    for (const [linkName, load] of Object.entries(linkLoadData)) {
-      for (const [from, to] of QUARTER_HOURS) {
-        const timeInterval = formatTimeInterval(from, to);
+  const dayLoadData: Record<TimeInterval, LinkWeights> = {};
 
-        if (!(timeInterval in dayLoadData)) {
-          dayLoadData[timeInterval] = {};
-        }
+  for (const [linkName, load] of Object.entries(linkLoadData)) {
+    for (const [from, to] of QUARTER_HOURS) {
+      const timeInterval = formatTimeInterval(from, to);
 
-        dayLoadData[timeInterval][linkName] = load.quarterHours[timeInterval];
+      if (!(timeInterval in dayLoadData)) {
+        dayLoadData[timeInterval] = {};
       }
+
+      dayLoadData[timeInterval][linkName] = load.quarterHours[timeInterval];
     }
+  }
 
-    const linkFrequencyData = parseLinkFrequencyData(workbook);
+  const linkFrequencyData = parseLinkFrequencyData(workbook);
 
-    const dayFrequencyData: Record<TimeInterval, LinkWeights> = {};
+  const dayFrequencyData: Record<TimeInterval, LinkWeights> = {};
 
-    for (const [linkName, frequency] of Object.entries(linkFrequencyData)) {
-      for (const [from, to] of QUARTER_HOURS) {
-        const timeInterval = formatTimeInterval(from, to);
+  for (const [linkName, frequency] of Object.entries(linkFrequencyData)) {
+    for (const [from, to] of QUARTER_HOURS) {
+      const timeInterval = formatTimeInterval(from, to);
 
-        if (!(timeInterval in dayFrequencyData)) {
-          dayFrequencyData[timeInterval] = {};
-        }
-
-        dayFrequencyData[timeInterval][linkName] =
-          frequency.quarterHours[timeInterval];
+      if (!(timeInterval in dayFrequencyData)) {
+        dayFrequencyData[timeInterval] = {};
       }
-    }
 
-    switch (day) {
-      case "MON":
-        load.Monday = dayLoadData;
-        frequency.Monday = dayFrequencyData;
-        break;
-      case "MTT":
-        load.Monday = dayLoadData;
-        frequency.Monday = dayFrequencyData;
-        load.Tuesday = dayLoadData;
-        frequency.Tuesday = dayFrequencyData;
-        load.Wednesday = dayLoadData;
-        frequency.Wednesday = dayFrequencyData;
-        load.Thursday = dayLoadData;
-        frequency.Thursday = dayFrequencyData;
-        break;
-      case "TWT":
-        load.Tuesday = dayLoadData;
-        frequency.Tuesday = dayFrequencyData;
-        load.Wednesday = dayLoadData;
-        frequency.Wednesday = dayFrequencyData;
-        load.Thursday = dayLoadData;
-        frequency.Thursday = dayFrequencyData;
-        break;
-      case "FRI":
-        load.Friday = dayLoadData;
-        frequency.Friday = dayFrequencyData;
-        break;
-      case "SAT":
-        load.Saturday = dayLoadData;
-        frequency.Saturday = dayFrequencyData;
-        break;
-      case "SUN":
-        load.Sunday = dayLoadData;
-        frequency.Sunday = dayFrequencyData;
-        break;
+      dayFrequencyData[timeInterval][linkName] =
+        frequency.quarterHours[timeInterval];
     }
   }
 
   return (
     <AnimatedTubeMapVisualisation
-      linkLoadData={load}
-      linkFrequencyData={frequency}
+      linkLoadData={dayLoadData}
+      linkFrequencyData={dayFrequencyData}
       year={year}
     />
   );

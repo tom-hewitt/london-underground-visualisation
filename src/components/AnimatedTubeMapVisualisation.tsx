@@ -32,8 +32,7 @@ import {
   LinkWeights,
   weightLinks,
 } from "@/data/tube/numbat/process";
-import { max, path, scaleLinear } from "d3";
-import { cabin } from "@/fonts";
+import { max, scaleLinear } from "d3";
 import { useInterval } from "usehooks-ts";
 
 export function AnimatedTubeMapVisualisation({
@@ -41,14 +40,10 @@ export function AnimatedTubeMapVisualisation({
   linkFrequencyData,
   year,
 }: {
-  linkLoadData: Partial<Record<DayOfWeek, Record<TimeInterval, LinkWeights>>>;
-  linkFrequencyData: Partial<
-    Record<DayOfWeek, Record<TimeInterval, LinkWeights>>
-  >;
+  linkLoadData: Record<TimeInterval, LinkWeights>;
+  linkFrequencyData: Record<TimeInterval, LinkWeights>;
   year: string;
 }) {
-  const [day, setDay] = useState<DayOfWeek>("Monday");
-
   const [minute, setMinute] = useState(0);
 
   const selectedQuarterHourIndex = Math.floor(minute / 15);
@@ -60,41 +55,24 @@ export function AnimatedTubeMapVisualisation({
     isPlaying ? 200 : null
   );
 
-  const dayLoadData = useMemo(() => {
-    const dayData = linkLoadData[day];
-    if (!dayData) {
-      throw new Error("No data for day " + day);
-    }
-
-    return dayData;
-  }, [linkLoadData, day]);
-  const dayFrequencyData = useMemo(() => {
-    const dayData = linkFrequencyData[day];
-    if (!dayData) {
-      throw new Error("No data for day " + day);
-    }
-
-    return dayData;
-  }, [linkFrequencyData, day]);
-
   const quarterHours = useMemo(
     () =>
-      Object.keys(dayLoadData)
+      Object.keys(linkLoadData)
         .sort()
         .map((q) => TimeInterval.assert(q)),
-    [dayLoadData]
+    [linkLoadData]
   );
 
   const quarterHourGraphs = useMemo(
     () =>
       quarterHours.map((quarterHour) =>
         prepareGraph(
-          dayLoadData[quarterHour],
-          dayFrequencyData[quarterHour],
+          linkLoadData[quarterHour],
+          linkFrequencyData[quarterHour],
           year
         )
       ),
-    [dayLoadData, dayFrequencyData, year, quarterHours]
+    [linkLoadData, linkFrequencyData, year, quarterHours]
   );
 
   const { weightedLinks, weightedLinkSections, weightedNodes } = useMemo(
@@ -136,20 +114,6 @@ export function AnimatedTubeMapVisualisation({
           padding: "16px",
         }}
       >
-        <div style={{ display: "flex", flexDirection: "row", gap: "8px" }}>
-          <label htmlFor="day-select">Day:</label>
-          <select
-            id="day-select"
-            value={day}
-            onChange={(e) => setDay(DayOfWeek.assert(e.target.value))}
-          >
-            {Object.keys(linkLoadData).map((day) => (
-              <option key={day} value={day}>
-                {day}
-              </option>
-            ))}
-          </select>
-        </div>
         <div
           style={{
             flexGrow: 1,
