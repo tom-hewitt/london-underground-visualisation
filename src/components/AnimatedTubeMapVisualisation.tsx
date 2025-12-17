@@ -7,8 +7,10 @@ import {
 } from "@/data/process";
 import {
   DayOfWeek,
+  LineReference,
   LinkReference,
   StationReference,
+  WeightedLineReferenceWithFrequency,
   WeightedLink,
   WeightedLinkSection,
   WeightedLinkWithFrequencies,
@@ -19,6 +21,7 @@ import { Fragment, useMemo, useState } from "react";
 import { RiverThames } from "./RiverThames";
 import { LinkView } from "./LinkView";
 import {
+  LINES,
   LINK_SECTIONS,
   STATION_LABELS,
   STATION_NODES,
@@ -29,7 +32,10 @@ import { StationLabelView } from "./StationLabelView";
 import { TimeInterval } from "@/data/tube/numbat/types";
 import {
   addFrequenciesToWeightedLinks,
+  adjustWeightForFrequencies,
+  adjustWeightsForFrequencies,
   LinkWeights,
+  resolveLinks,
   weightLinks,
 } from "@/data/tube/numbat/process";
 import { max, scaleLinear } from "d3";
@@ -38,10 +44,12 @@ import { useInterval } from "usehooks-ts";
 export function AnimatedTubeMapVisualisation({
   linkLoadData,
   linkFrequencyData,
+  linkOrderData,
   year,
 }: {
   linkLoadData: Record<TimeInterval, LinkWeights>;
   linkFrequencyData: Record<TimeInterval, LinkWeights>;
+  linkOrderData: LinkWeights;
   year: string;
 }) {
   const [minute, setMinute] = useState(0);
@@ -50,9 +58,11 @@ export function AnimatedTubeMapVisualisation({
 
   const [isPlaying, setIsPlaying] = useState(false);
 
+  const intervalDelayMs = 100;
+
   useInterval(
-    () => setMinute((minute) => (minute + 1) % (24 * 60)),
-    isPlaying ? 200 : null
+    () => setMinute((minute) => (minute + 0.25) % (24 * 60)),
+    isPlaying ? intervalDelayMs : null
   );
 
   const quarterHours = useMemo(
@@ -69,6 +79,7 @@ export function AnimatedTubeMapVisualisation({
         prepareGraph(
           linkLoadData[quarterHour],
           linkFrequencyData[quarterHour],
+          linkOrderData,
           year
         )
       ),
@@ -135,7 +146,15 @@ export function AnimatedTubeMapVisualisation({
             min={0}
             max={24 * 60 - 1}
           />
-          <p>{minute}</p>
+          <p>
+            {new Date(
+              0,
+              0,
+              0,
+              Math.floor(minute / 60),
+              Math.floor(minute % 60)
+            ).toLocaleTimeString("en-GB", { timeStyle: "short" })}
+          </p>
         </div>
       </div>
       <AnimatedNetwork
@@ -145,6 +164,7 @@ export function AnimatedTubeMapVisualisation({
         linkSizeScale={scale}
         nodeSizeScale={scale}
         minute={minute}
+        intervalDelayMs={intervalDelayMs}
       />
     </div>
   );
@@ -153,19 +173,28 @@ export function AnimatedTubeMapVisualisation({
 function prepareGraph(
   loadData: LinkWeights,
   frequencyData: LinkWeights,
+  linkOrders: LinkWeights,
   year: string
 ): {
   weightedLinks: WeightedLinkWithFrequencies[];
   weightedLinkSections: Record<string, WeightedLinkSection>;
   weightedNodes: Record<string, WeightedStationNode>;
 } {
-  const weightedLinks = addFrequenciesToWeightedLinks(
-    weightLinks(loadData, year),
-    frequencyData,
-    year
+  const weightedLinks = resolveLinks(
+    addFrequenciesToWeightedLinks(
+      weightLinks(loadData, year),
+      frequencyData,
+      linkOrders,
+      year
+    )
   );
 
-  const weightedLinkSections = weightLinkSections(LINK_SECTIONS, weightedLinks);
+  const frequencyAdjustedLinks = adjustWeightsForFrequencies(weightedLinks);
+
+  const weightedLinkSections = weightLinkSections(
+    LINK_SECTIONS,
+    frequencyAdjustedLinks
+  );
 
   const weightedNodes = weightNodesWithMaxLinkSectionWeight(
     STATION_NODES,
@@ -182,6 +211,7 @@ function AnimatedNetwork({
   linkSizeScale,
   nodeSizeScale,
   minute,
+  intervalDelayMs,
 }: {
   weightedLinks: WeightedLinkWithFrequencies[];
   weightedNodes: Record<string, WeightedStationNode>;
@@ -189,6 +219,7 @@ function AnimatedNetwork({
   linkSizeScale: (n: number) => number;
   nodeSizeScale: (n: number) => number;
   minute: number;
+  intervalDelayMs: number;
 }) {
   const linkSectionOffsets = useMemo(
     () => offsetLinkLinesByWeight(weightedLinkSections, linkSizeScale),
@@ -228,6 +259,9 @@ function AnimatedNetwork({
               }
             };
 
+            const directions =
+              link.from.directions || LINES[line.lineName].directions;
+
             return (
               <Fragment
                 key={`${link.from.nodeName}-${link.to.nodeName}-${line.lineName}`}
@@ -236,54 +270,50 @@ function AnimatedNetwork({
                   link={link}
                   line={line}
                   linkSectionOffsets={linkSectionOffsets}
-                  weight={line.weight}
+                  weight={adjustWeightForFrequencies(
+                    line.weight,
+                    line.frequencies
+                  )}
                   scale={linkSizeScale}
                   opacity={0.5}
-                />
-                {Array.from({ length: line.frequencies[0] }).map((_, i) => {
-                  const minuteInQuarter = minute % 15;
-
-                  const startMinute = (10 / line.frequencies[0]) * i;
-
-                  const journeyLength = 5;
-
-                  let pathLength = 0.2;
-
-                  let pathOffset =
-                    (minuteInQuarter - startMinute) / journeyLength -
-                    pathLength / 2;
-
-                  // Prevent wrapping
-                  if (pathOffset < 0) {
-                    if (pathOffset + pathLength >= 0) {
-                      pathLength = pathLength + pathOffset;
-                      pathOffset = 0;
-                    } else {
-                      pathLength = 0;
-                      pathOffset = 0;
-                    }
-                  } else if (pathOffset > 1 - pathLength) {
-                    if (pathOffset <= 1) {
-                      pathLength = 1 - pathOffset;
-                    } else {
-                      return null;
-                    }
+                  hovered={hovered}
+                  setHovered={setHovered}
+                  tooltip={
+                    <>
+                      Quarter Hour Frequencies: {line.frequencies[0]} services{" "}
+                      {directions[0]}, {line.frequencies[1]} services{" "}
+                      {directions[1]}
+                    </>
                   }
-
-                  return (
-                    <LinkView
-                      key={`${link.from.nodeName}-${link.to.nodeName}-${line.lineName}-${quarterHour}-${i}`}
-                      link={link}
-                      line={line}
-                      linkSectionOffsets={linkSectionOffsets}
-                      weight={line.weight} // TODO: divide by frequency
-                      scale={linkSizeScale}
-                      pathLength={pathLength}
-                      pathOffset={pathOffset}
-                      transition={{ duration: 0.25, ease: "linear" }}
-                    />
-                  );
-                })}
+                />
+                {Array.from({ length: line.frequencies[0] }).map((_, i) => (
+                  <AnimatedService
+                    key={`${link.from.nodeName}-${link.to.nodeName}-${line.lineName}-${quarterHour}-${i}-0`}
+                    link={link}
+                    line={line}
+                    linkSectionOffsets={linkSectionOffsets}
+                    linkSizeScale={linkSizeScale}
+                    intervalDelayMs={intervalDelayMs}
+                    minute={minute}
+                    quarterHour={quarterHour}
+                    i={i}
+                    direction={0}
+                  />
+                ))}
+                {Array.from({ length: line.frequencies[1] }).map((_, i) => (
+                  <AnimatedService
+                    key={`${link.from.nodeName}-${link.to.nodeName}-${line.lineName}-${quarterHour}-${i}-1`}
+                    link={link}
+                    line={line}
+                    linkSectionOffsets={linkSectionOffsets}
+                    linkSizeScale={linkSizeScale}
+                    intervalDelayMs={intervalDelayMs}
+                    minute={minute}
+                    quarterHour={quarterHour}
+                    i={i}
+                    direction={1}
+                  />
+                ))}
               </Fragment>
             );
           });
@@ -385,3 +415,93 @@ function AnimatedNetwork({
 type HoveredItem =
   | { type: "link"; link: LinkReference }
   | { type: "station"; station: StationReference; element: "node" | "label" };
+
+function AnimatedService({
+  link,
+  line,
+  linkSectionOffsets,
+  linkSizeScale,
+  minute,
+  quarterHour,
+  i,
+  intervalDelayMs,
+  direction,
+}: {
+  link: WeightedLinkWithFrequencies;
+  line: WeightedLineReferenceWithFrequency;
+  linkSectionOffsets: Record<string, Record<string, number>>;
+  linkSizeScale: (n: number) => number;
+  minute: number;
+  quarterHour: number;
+  i: number;
+  intervalDelayMs: number;
+  direction: 0 | 1;
+}) {
+  const minuteInQuarter = minute % 15;
+
+  const journeyLength = 1;
+
+  const startMinute =
+    ((15 / (line.frequencies[direction] + 1)) * i +
+      line.orders[direction] +
+      LINE_OFFSETS[line.lineName]) %
+    15;
+
+  let pathLength = 0.2;
+
+  let pathOffset =
+    (minuteInQuarter - startMinute) / journeyLength - pathLength / 2;
+
+  // Prevent wrapping
+  if (pathOffset < 0) {
+    if (pathOffset + pathLength >= 0) {
+      pathLength = pathLength + pathOffset;
+      pathOffset = 0;
+    } else {
+      pathLength = 0;
+      pathOffset = 0;
+    }
+  } else if (pathOffset > 1 - pathLength) {
+    if (pathOffset <= 1) {
+      pathLength = 1 - pathOffset;
+    } else {
+      return null;
+    }
+  }
+
+  if (direction === 1) {
+    pathOffset = 1 - pathOffset;
+  }
+
+  return (
+    <LinkView
+      link={link}
+      line={line}
+      linkSectionOffsets={linkSectionOffsets}
+      weight={line.weight / line.frequencies[direction]}
+      scale={linkSizeScale}
+      pathLength={pathLength}
+      pathOffset={pathOffset}
+      transition={{
+        duration: intervalDelayMs / 1000,
+        ease: "linear",
+      }}
+      pointerEvents="none"
+    />
+  );
+}
+
+const LINE_OFFSETS: Record<string, number> = {
+  Central: 0,
+  Jubilee: 1,
+  Victoria: 2,
+  Northern: 3,
+  Picadilly: 4,
+  Bakerloo: 5,
+  District: 6,
+  Circle: 7,
+  "H&C": 8,
+  Metropolitan: 9,
+  "Waterloo & City": 10,
+  "Elizabeth Line": 11,
+};

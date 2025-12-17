@@ -2,6 +2,7 @@
 
 import { cabin } from "@/fonts";
 import {
+  LINES,
   LINK_SECTIONS,
   STATION_LABELS,
   STATION_NODES,
@@ -14,17 +15,18 @@ import {
   WeightedLinkSection,
   WeightedStationNode,
 } from "@/data/types";
-import { cumsum, max, pairs, scaleLinear } from "d3";
-import { zip } from "radash";
+import { max, scaleLinear } from "d3";
 import { useMemo, useState } from "react";
-import { createPortal } from "react-dom";
-import { LinkWeights, weightLinks } from "@/data/tube/numbat/process";
+import {
+  LinkWeights,
+  resolveLinks,
+  weightLinks,
+} from "@/data/tube/numbat/process";
 import {
   offsetLinkLinesByWeight,
   weightLinkSections,
   weightNodesWithMaxLinkSectionWeight,
 } from "@/data/process";
-import { OffsetPath } from "./OffsetPath";
 import { useZoom } from "@/hooks/useZoom";
 import { RiverThames } from "./RiverThames";
 import { LinkView } from "./LinkView";
@@ -113,7 +115,7 @@ function prepareGraph(
   weightedLinkSections: Record<string, WeightedLinkSection>;
   weightedNodes: Record<string, WeightedStationNode>;
 } {
-  const weightedLinks = weightLinks(data, year);
+  const weightedLinks = resolveLinks(weightLinks(data, year));
 
   const weightedLinkSections = weightLinkSections(LINK_SECTIONS, weightedLinks);
 
@@ -200,6 +202,42 @@ function WeightedNetworkVisualisation({
                 scale={linkSizeScale}
                 hovered={hovered}
                 setHovered={setHovered}
+                tooltip={
+                  <>
+                    <div
+                      style={{
+                        width: "10px",
+                        backgroundColor: LINES[line.lineName].colour,
+                      }}
+                    />
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                      <div>
+                        <strong>
+                          {
+                            STATIONS.filter(
+                              ({ nlc }) =>
+                                nlc ===
+                                STATION_NODES[link.from.nodeName].station.nlc
+                            )[0].name
+                          }
+                        </strong>
+                        {" to "}
+                        <strong>
+                          {
+                            STATIONS.filter(
+                              ({ nlc }) =>
+                                nlc ===
+                                STATION_NODES[link.to.nodeName].station.nlc
+                            )[0].name
+                          }
+                        </strong>
+                      </div>
+                      <span>{line.lineName}</span>
+                    </div>
+                    <div style={{ width: "8px" }} />
+                    {Math.round(line.weight).toLocaleString()} passengers
+                  </>
+                }
               />
             );
           });

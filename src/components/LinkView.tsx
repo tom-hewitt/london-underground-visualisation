@@ -28,6 +28,8 @@ export function LinkView({
   pathOffset,
   opacity = 1,
   transition,
+  pointerEvents = "auto",
+  tooltip = null,
 }: {
   link: Link;
   line: LineReference;
@@ -41,6 +43,8 @@ export function LinkView({
   pathOffset?: number;
   opacity?: number;
   transition?: Transition;
+  pointerEvents?: "auto" | "none";
+  tooltip?: React.ReactNode | null;
 }) {
   const width = scale(weight);
 
@@ -80,6 +84,7 @@ export function LinkView({
           strokeLinejoin="round"
           fill="none"
           opacity={opacity}
+          style={{ pointerEvents: "none" }}
         />
       ) : null}
       <OffsetPath
@@ -97,8 +102,9 @@ export function LinkView({
         animate={{ strokeWidth: width, pathLength, pathOffset }}
         opacity={opacity}
         transition={transition}
+        style={{ pointerEvents }}
       />
-      {hovered && mousePosition
+      {hovered && mousePosition && tooltip
         ? createPortal(
             <div
               className={cabin.className}
@@ -115,31 +121,7 @@ export function LinkView({
                 paddingRight: "4px",
               }}
             >
-              <div style={{ width: "10px", backgroundColor: colour }} />
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <div>
-                  <strong>
-                    {
-                      STATIONS.filter(
-                        ({ nlc }) =>
-                          nlc === STATION_NODES[link.from.nodeName].station.nlc
-                      )[0].name
-                    }
-                  </strong>
-                  {" to "}
-                  <strong>
-                    {
-                      STATIONS.filter(
-                        ({ nlc }) =>
-                          nlc === STATION_NODES[link.to.nodeName].station.nlc
-                      )[0].name
-                    }
-                  </strong>
-                </div>
-                <span>{line.lineName}</span>
-              </div>
-              <div style={{ width: "8px" }} />
-              {Math.round(weight).toLocaleString()} passengers
+              {tooltip}
             </div>,
             document.body
           )

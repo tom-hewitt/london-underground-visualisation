@@ -1,5 +1,6 @@
 import {
   LineReference,
+  Link,
   StationNodeReference,
   WeightedLink,
   WeightedLinkWithFrequencies,
@@ -19,8 +20,6 @@ export function weightLinks(
 ): WeightedLink[] {
   return LINKS.map((link) => ({
     ...link,
-    from: resolveStationNodeReference(link.from),
-    to: resolveStationNodeReference(link.to),
     lines: link.lines.map((line) => {
       const linkLoads = linkNames(line, link.from, link.to, year).map(
         (name) => {
@@ -51,27 +50,71 @@ export function weightLinks(
 export function addFrequenciesToWeightedLinks(
   weightedLinks: WeightedLink[],
   frequencyData: LinkWeights,
+  orderData: LinkWeights,
   year: string = "2024"
 ): WeightedLinkWithFrequencies[] {
   return weightedLinks.map((link) => ({
     ...link,
     lines: link.lines.map((line) => {
-      const linkFrequencies = linkNames(line, link.from, link.to, year).map(
-        (name) => {
-          if (name in frequencyData) {
-            return frequencyData[name];
-          } else {
-            console.warn(`Missing load data for link: ${name}`);
-            return 0;
-          }
+      const names = linkNames(line, link.from, link.to, year);
+
+      const linkFrequencies = names.map((name) => {
+        if (name in frequencyData) {
+          return frequencyData[name];
+        } else {
+          console.warn(`Missing load data for link: ${name}`);
+          return 0;
         }
-      ) as [number, number];
+      }) as [number, number];
+
+      const linkOrders = names.map((name) => {
+        if (name in orderData) {
+          return orderData[name];
+        } else {
+          console.warn(`Missing order data for link: ${name}`);
+          return 0;
+        }
+      }) as [number, number];
 
       return {
         ...line,
         frequencies: linkFrequencies,
+        orders: linkOrders,
       };
     }),
+  }));
+}
+
+export function adjustWeightForFrequencies(
+  weight: number,
+  frequencies: number[]
+): number {
+  const minFrequency = Math.min(...frequencies.filter((f) => f > 0));
+
+  if (!minFrequency) {
+    return 0;
+  }
+
+  return weight / minFrequency;
+}
+
+export function adjustWeightsForFrequencies(
+  weightedLinks: WeightedLinkWithFrequencies[]
+): WeightedLink[] {
+  return weightedLinks.map((link) => ({
+    ...link,
+    lines: link.lines.map((line) => ({
+      ...line,
+      weight: adjustWeightForFrequencies(line.weight, line.frequencies),
+    })),
+  }));
+}
+
+export function resolveLinks<L extends Link>(links: L[]): L[] {
+  return links.map((link) => ({
+    ...link,
+    from: resolveStationNodeReference(link.from),
+    to: resolveStationNodeReference(link.to),
   }));
 }
 

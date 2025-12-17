@@ -23,13 +23,15 @@ export async function AnimatedTubeMap({
   const [year, days] = numbatData[numbatData.length - 1];
 
   // Only use Friday data for animated map to reduce data size
-  const [day, data] = days.find(([day, _]) => day === "FRI")!;
+  const [day, data] = days.find(([day, _]) => day === "TWT")!;
 
   const workbook = read(data, { type: "array" });
 
   const linkLoadData = parseLinkLoadData(workbook);
 
   const dayLoadData: Record<TimeInterval, LinkWeights> = {};
+
+  const linkOrderData: LinkWeights = {};
 
   for (const [linkName, load] of Object.entries(linkLoadData)) {
     for (const [from, to] of QUARTER_HOURS) {
@@ -40,6 +42,8 @@ export async function AnimatedTubeMap({
       }
 
       dayLoadData[timeInterval][linkName] = load.quarterHours[timeInterval];
+
+      linkOrderData[linkName] = load.order;
     }
   }
 
@@ -64,6 +68,7 @@ export async function AnimatedTubeMap({
     <AnimatedTubeMapVisualisation
       linkLoadData={dayLoadData}
       linkFrequencyData={dayFrequencyData}
+      linkOrderData={linkOrderData}
       year={year}
     />
   );

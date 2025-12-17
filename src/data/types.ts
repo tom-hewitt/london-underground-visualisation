@@ -78,6 +78,7 @@ export interface WeightedLink extends Link {
 export interface WeightedLineReferenceWithFrequency
   extends WeightedLineReference {
   frequencies: [number, number];
+  orders: [number, number];
 }
 
 export interface WeightedLinkWithFrequencies extends WeightedLink {
