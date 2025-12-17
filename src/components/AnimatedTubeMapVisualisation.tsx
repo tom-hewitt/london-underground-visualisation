@@ -32,7 +32,7 @@ import { StationLabelView } from "./StationLabelView";
 import { TimeInterval } from "@/data/tube/numbat/types";
 import {
   addFrequenciesToWeightedLinks,
-  adjustWeightForFrequencies,
+  calculateSeatLoad,
   adjustWeightsForFrequencies,
   LinkWeights,
   resolveLinks,
@@ -189,11 +189,11 @@ function prepareGraph(
     )
   );
 
-  const frequencyAdjustedLinks = adjustWeightsForFrequencies(weightedLinks);
+  const seatLoadWeightedLinks = adjustWeightsForFrequencies(weightedLinks);
 
   const weightedLinkSections = weightLinkSections(
     LINK_SECTIONS,
-    frequencyAdjustedLinks
+    seatLoadWeightedLinks
   );
 
   const weightedNodes = weightNodesWithMaxLinkSectionWeight(
@@ -270,9 +270,10 @@ function AnimatedNetwork({
                   link={link}
                   line={line}
                   linkSectionOffsets={linkSectionOffsets}
-                  weight={adjustWeightForFrequencies(
+                  weight={calculateSeatLoad(
                     line.weight,
-                    line.frequencies
+                    line.frequencies,
+                    line
                   )}
                   scale={linkSizeScale}
                   opacity={0.5}
@@ -280,9 +281,73 @@ function AnimatedNetwork({
                   setHovered={setHovered}
                   tooltip={
                     <>
-                      Quarter Hour Frequencies: {line.frequencies[0]} services{" "}
-                      {directions[0]}, {line.frequencies[1]} services{" "}
-                      {directions[1]}
+                      <div
+                        style={{
+                          width: "10px",
+                          backgroundColor: LINES[line.lineName].colour,
+                        }}
+                      />
+                      <div style={{ display: "flex", flexDirection: "column" }}>
+                        <div style={{ display: "flex", flexDirection: "row" }}>
+                          <div>
+                            <strong>
+                              {
+                                STATIONS.filter(
+                                  ({ nlc }) =>
+                                    nlc ===
+                                    STATION_NODES[link.from.nodeName].station
+                                      .nlc
+                                )[0].name
+                              }
+                            </strong>
+                            {" to "}
+                            <strong>
+                              {
+                                STATIONS.filter(
+                                  ({ nlc }) =>
+                                    nlc ===
+                                    STATION_NODES[link.to.nodeName].station.nlc
+                                )[0].name
+                              }
+                            </strong>
+                          </div>
+                          <div style={{ flexGrow: 1, minWidth: "20px" }} />
+                          <span>{line.lineName}</span>
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            color: "#666666",
+                          }}
+                        >
+                          <p>
+                            Quarter Hour Loads:{" "}
+                            {Math.floor(line.weight).toLocaleString()}{" "}
+                            passengers
+                          </p>
+                          <p>
+                            Quarter Hour Frequencies: {line.frequencies[0]}{" "}
+                            services {directions[0]}, {line.frequencies[1]}{" "}
+                            services {directions[1]}
+                          </p>
+                          <p>
+                            Train Capacity:{" "}
+                            {LINES[
+                              line.lineName
+                            ].trainCapacity.toLocaleString()}{" "}
+                            passengers
+                          </p>
+                          <p>
+                            Quarter Hour Seat Load Factor:{" "}
+                            {calculateSeatLoad(
+                              line.weight,
+                              line.frequencies,
+                              line
+                            ).toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
                     </>
                   }
                 />
@@ -292,7 +357,7 @@ function AnimatedNetwork({
                     link={link}
                     line={line}
                     linkSectionOffsets={linkSectionOffsets}
-                    linkSizeScale={linkSizeScale}
+                    serviceWidthScale={linkSizeScale}
                     intervalDelayMs={intervalDelayMs}
                     minute={minute}
                     quarterHour={quarterHour}
@@ -306,7 +371,7 @@ function AnimatedNetwork({
                     link={link}
                     line={line}
                     linkSectionOffsets={linkSectionOffsets}
-                    linkSizeScale={linkSizeScale}
+                    serviceWidthScale={linkSizeScale}
                     intervalDelayMs={intervalDelayMs}
                     minute={minute}
                     quarterHour={quarterHour}
@@ -420,7 +485,8 @@ function AnimatedService({
   link,
   line,
   linkSectionOffsets,
-  linkSizeScale,
+  serviceWidthScale,
+  serviceLengthScale = scaleLinear().domain([0, 1500]).range([0, 0.4]),
   minute,
   quarterHour,
   i,
@@ -430,7 +496,8 @@ function AnimatedService({
   link: WeightedLinkWithFrequencies;
   line: WeightedLineReferenceWithFrequency;
   linkSectionOffsets: Record<string, Record<string, number>>;
-  linkSizeScale: (n: number) => number;
+  serviceWidthScale: (n: number) => number;
+  serviceLengthScale?: (n: number) => number;
   minute: number;
   quarterHour: number;
   i: number;
@@ -447,7 +514,7 @@ function AnimatedService({
       LINE_OFFSETS[line.lineName]) %
     15;
 
-  let pathLength = 0.2;
+  let pathLength = serviceLengthScale(LINES[line.lineName].trainCapacity);
 
   let pathOffset =
     (minuteInQuarter - startMinute) / journeyLength - pathLength / 2;
@@ -478,8 +545,8 @@ function AnimatedService({
       link={link}
       line={line}
       linkSectionOffsets={linkSectionOffsets}
-      weight={line.weight / line.frequencies[direction]}
-      scale={linkSizeScale}
+      weight={calculateSeatLoad(line.weight, line.frequencies, line)}
+      scale={serviceWidthScale}
       pathLength={pathLength}
       pathOffset={pathOffset}
       transition={{
@@ -496,7 +563,7 @@ const LINE_OFFSETS: Record<string, number> = {
   Jubilee: 1,
   Victoria: 2,
   Northern: 3,
-  Picadilly: 4,
+  Piccadilly: 4,
   Bakerloo: 5,
   District: 6,
   Circle: 7,

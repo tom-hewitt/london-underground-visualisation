@@ -85,9 +85,10 @@ export function addFrequenciesToWeightedLinks(
   }));
 }
 
-export function adjustWeightForFrequencies(
+export function calculateSeatLoad(
   weight: number,
-  frequencies: number[]
+  frequencies: number[],
+  line: LineReference
 ): number {
   const minFrequency = Math.min(...frequencies.filter((f) => f > 0));
 
@@ -95,7 +96,14 @@ export function adjustWeightForFrequencies(
     return 0;
   }
 
-  return weight / minFrequency;
+  const trainCapacity = LINES[line.lineName]?.trainCapacity;
+
+  if (!trainCapacity) {
+    console.warn(`Missing train capacity for line: ${line.lineName}`);
+    return weight / minFrequency;
+  }
+
+  return weight / minFrequency / trainCapacity;
 }
 
 export function adjustWeightsForFrequencies(
@@ -105,7 +113,7 @@ export function adjustWeightsForFrequencies(
     ...link,
     lines: link.lines.map((line) => ({
       ...line,
-      weight: adjustWeightForFrequencies(line.weight, line.frequencies),
+      weight: calculateSeatLoad(line.weight, line.frequencies, line),
     })),
   }));
 }

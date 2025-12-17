@@ -211,31 +211,35 @@ function WeightedNetworkVisualisation({
                       }}
                     />
                     <div style={{ display: "flex", flexDirection: "column" }}>
-                      <div>
-                        <strong>
-                          {
-                            STATIONS.filter(
-                              ({ nlc }) =>
-                                nlc ===
-                                STATION_NODES[link.from.nodeName].station.nlc
-                            )[0].name
-                          }
-                        </strong>
-                        {" to "}
-                        <strong>
-                          {
-                            STATIONS.filter(
-                              ({ nlc }) =>
-                                nlc ===
-                                STATION_NODES[link.to.nodeName].station.nlc
-                            )[0].name
-                          }
-                        </strong>
+                      <div style={{ display: "flex", flexDirection: "row" }}>
+                        <div>
+                          <strong>
+                            {
+                              STATIONS.filter(
+                                ({ nlc }) =>
+                                  nlc ===
+                                  STATION_NODES[link.from.nodeName].station.nlc
+                              )[0].name
+                            }
+                          </strong>
+                          {" to "}
+                          <strong>
+                            {
+                              STATIONS.filter(
+                                ({ nlc }) =>
+                                  nlc ===
+                                  STATION_NODES[link.to.nodeName].station.nlc
+                              )[0].name
+                            }
+                          </strong>
+                        </div>
+                        <div style={{ flexGrow: 1, minWidth: "20px" }} />
+                        <span>{line.lineName}</span>
                       </div>
-                      <span>{line.lineName}</span>
+                      <div style={{ color: "#666666" }}>
+                        {Math.round(line.weight).toLocaleString()} passengers
+                      </div>
                     </div>
-                    <div style={{ width: "8px" }} />
-                    {Math.round(line.weight).toLocaleString()} passengers
                   </>
                 }
               />

@@ -788,7 +788,7 @@ export const STATION_LABELS: StationLabel[] = [
     },
   },
 
-  // Picadilly
+  // Piccadilly
   {
     name: ["Gloucester", "Road"],
     station: { nlc: 583 },
@@ -1350,7 +1350,7 @@ export const STATION_NODES: Record<string, StationNode> = {
     y: 339.2,
   },
 
-  // Picadilly
+  // Piccadilly
   ECTu_PIC: {
     name: "ECTu_PIC",
     station: { nlc: 562 },
@@ -1460,73 +1460,84 @@ export const LINES: Record<string, Line> = {
     abbreviation: "BAK",
     directions: ["NB", "SB"],
     colour: "#AB571E",
+    trainCapacity: 730,
   },
   Central: {
     name: "Central",
     abbreviation: "CEN",
     directions: ["EB", "WB"],
     colour: "#D91A15",
+    trainCapacity: 892,
   },
   District: {
     name: "District",
     abbreviation: "DIS",
     directions: ["EB", "WB"],
     colour: "#007336",
+    trainCapacity: 892,
   },
   "Elizabeth Line": {
     name: "Elizabeth Line",
     abbreviation: "EZL",
     directions: ["EB", "WB"],
     colour: "#734293",
+    trainCapacity: 1500,
   },
   Northern: {
     name: "Northern",
     abbreviation: "NOR",
     directions: ["NB", "SB"],
     colour: "#000000",
+    trainCapacity: 689,
   },
   Metropolitan: {
     name: "Metropolitan",
     abbreviation: "MET",
     directions: ["NB", "SB"],
     colour: "#8C1A4F",
+    trainCapacity: 1004,
   },
-  // H&C and Circle are treated as one line in the dataset
   "H&C": {
     name: "H&C",
     abbreviation: "HAM",
     directions: ["IR", "OR"],
     colour: "#EEA0B3",
+    trainCapacity: 892,
   },
   Circle: {
     name: "Circle",
     abbreviation: "HAM",
     directions: ["IR", "OR"],
     colour: "#FFD300",
+    trainCapacity: 892,
   },
   Jubilee: {
     name: "Jubilee",
     abbreviation: "JUB",
     directions: ["NB", "SB"],
     colour: "#82898F",
+    trainCapacity: 820,
   },
-  Picadilly: {
-    name: "Picadilly",
+  Piccadilly: {
+    name: "Piccadilly",
     abbreviation: "PIC",
     directions: ["EB", "WB"],
     colour: "#2E2B81",
+    trainCapacity: 684,
   },
   Victoria: {
     name: "Victoria",
     abbreviation: "VIC",
     directions: ["NB", "SB"],
     colour: "#009CDB",
+    trainCapacity: 857,
   },
   "Waterloo & City": {
     name: "Waterloo & City",
     abbreviation: "WAC",
     directions: ["EB", "WB"],
     colour: "#7CC5AF",
+    trainCapacity: 432,
   },
 };
 
@@ -1594,7 +1605,7 @@ export const LINK_NODES: Record<string, LinkNode> = {
 
   "MGT-LST": { x: 595.5, y: 390.3 }, // TODO: this doesn't work if LST-MGT - some weird alphabetic stuff going on
 
-  // Picadilly
+  // Piccadilly
   "SKN-KNB": { x: 393.5, y: 473.8 },
   "HPC-GPK": { x: 436, y: 432.1 },
   "PIC-LSQ": { x: 495, y: 432.2 },
@@ -1777,63 +1788,63 @@ export const LINKS: Link[] = [
     to: { nodeName: "BSTu_JUB" },
   },
 
-  // Picadilly
+  // Piccadilly
   {
-    lines: [{ lineName: "Picadilly" }],
+    lines: [{ lineName: "Piccadilly" }],
     from: { nodeName: "ECTu_PIC" },
     to: { nodeName: "GRDu_PIC" },
   },
   {
-    lines: [{ lineName: "Picadilly" }],
+    lines: [{ lineName: "Piccadilly" }],
     from: { nodeName: "GRDu_PIC" },
     to: { nodeName: "SKNu_PIC" },
   },
   {
-    lines: [{ lineName: "Picadilly" }],
+    lines: [{ lineName: "Piccadilly" }],
     from: { nodeName: "SKNu_PIC" },
     to: { nodeName: "KNBu_PIC" },
     path: [{ linkNodeName: "SKN-KNB" }],
   },
   {
-    lines: [{ lineName: "Picadilly" }],
+    lines: [{ lineName: "Piccadilly" }],
     from: { nodeName: "KNBu_PIC" },
     to: { nodeName: "HPCu_PIC" },
   },
   {
-    lines: [{ lineName: "Picadilly" }],
+    lines: [{ lineName: "Piccadilly" }],
     from: { nodeName: "HPCu_PIC" },
     to: { nodeName: "GPKu_PIC" },
     path: [{ linkNodeName: "HPC-GPK" }],
   },
   {
-    lines: [{ lineName: "Picadilly" }],
+    lines: [{ lineName: "Piccadilly" }],
     from: { nodeName: "GPKu_PIC" },
     to: { nodeName: "PICu_PIC" },
   },
   {
-    lines: [{ lineName: "Picadilly" }],
+    lines: [{ lineName: "Piccadilly" }],
     from: { nodeName: "PICu_PIC" },
     to: { nodeName: "LSQu_PIC" },
     path: [{ linkNodeName: "PIC-LSQ" }],
   },
   {
-    lines: [{ lineName: "Picadilly" }],
+    lines: [{ lineName: "Piccadilly" }],
     from: { nodeName: "LSQu_PIC" },
     to: { nodeName: "COVu_PIC" },
   },
   {
-    lines: [{ lineName: "Picadilly" }],
+    lines: [{ lineName: "Piccadilly" }],
     from: { nodeName: "COVu_PIC" },
     to: { nodeName: "HOLu_PIC" },
   },
   {
-    lines: [{ lineName: "Picadilly" }],
+    lines: [{ lineName: "Piccadilly" }],
     from: { nodeName: "HOLu_PIC" },
     to: { nodeName: "RSQu_PIC" },
     path: [{ linkNodeName: "HOL-RSQ" }],
   },
   {
-    lines: [{ lineName: "Picadilly" }],
+    lines: [{ lineName: "Piccadilly" }],
     from: { nodeName: "RSQu_PIC" },
     to: { nodeName: "KXXu_PIC" },
   },

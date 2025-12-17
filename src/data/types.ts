@@ -53,6 +53,7 @@ export interface Line {
   abbreviation: string;
   directions: [string, string];
   colour: string;
+  trainCapacity: number;
 }
 
 export interface LineReference {
